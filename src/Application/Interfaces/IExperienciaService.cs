@@ -1,4 +1,4 @@
-using Domain.Entities;
+/*using Domain.Entities;
 
 namespace Application.Interfaces
 {
@@ -7,4 +7,4 @@ namespace Application.Interfaces
         List<Experiencia> GetAll();
         Experiencia? GetById(int id);
     }
-}
+}*/
