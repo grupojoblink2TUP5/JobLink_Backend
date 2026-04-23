@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Application.Services;
 using Domain.Entities;
-using Application.Interfaces;
 
 namespace Web.Controllers
 {
@@ -8,31 +8,37 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class ExperienciaController : ControllerBase
     {
-        private readonly IExperienciaService _experienciaService;
+        private readonly ExperienciaService _service;
 
-        // Aca se maneja la inyeccion por dependencia
-        public ExperienciaController(IExperienciaService experienciaService)
+        public ExperienciaController()
         {
-            _experienciaService = experienciaService;
+            _service = new ExperienciaService();
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public ActionResult<List<Experiencia>> Get()
         {
-            return Ok(_experienciaService.GetAll());
+            return _service.ObtenerTodas();
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        [HttpPost]
+        public ActionResult Post(Experiencia experiencia)
         {
-            var experiencia = _experienciaService.GetById(id);
-
-            if (experiencia == null)
-                return NotFound();
-
-            return Ok(experiencia);
+            var result = _service.Agregar(experiencia);
+            return CreatedAtAction(nameof(Get),result);
         }
 
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            var eliminado = _service.Eliminar(id);
 
+            if (!eliminado)
+            {
+                return NotFound($"No se encontró una experiencia con id {id}");
+            }
+
+            return NoContent();
+        }
     }
 }
