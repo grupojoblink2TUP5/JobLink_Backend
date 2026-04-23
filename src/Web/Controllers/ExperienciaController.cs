@@ -8,30 +8,34 @@ namespace Web.Controllers
     [Route("api/[controller]")]
     public class ExperienciaController : ControllerBase
     {
-        private readonly ExperienciaService _service;
+        private readonly ExperienciaService _experienciaService;
 
         public ExperienciaController()
         {
-            _service = new ExperienciaService();
+            _experienciaService = new ExperienciaService();
         }
 
-        [HttpGet]
-        public ActionResult<List<Experiencia>> Get()
+        [HttpGet("{id:int}")]
+        public IActionResult ObtenerPorId([FromRoute] int id)
         {
-            return _service.ObtenerTodas();
-        }
+            var experiencia = _experienciaService.ObtenerPorId(id);
 
+            if (experiencia == null)
+                return NotFound();
+
+            return Ok(experiencia);
+        }
         [HttpPost]
-        public ActionResult Post(Experiencia experiencia)
+        public IActionResult Post(Experiencia experiencia)
         {
-            var result = _service.Agregar(experiencia);
-            return CreatedAtAction(nameof(Get),result);
+            var result = _experienciaService.Agregar(experiencia);
+            return CreatedAtAction(nameof(ObtenerPorId), new { id = result.Id }, result);
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var eliminado = _service.Eliminar(id);
+            var eliminado = _experienciaService.Eliminar(id);
 
             if (!eliminado)
             {

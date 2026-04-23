@@ -5,7 +5,7 @@ namespace Application.Services
 {
     public class ExperienciaService
     {
-        private static List<Experiencia> experiencias = new();
+        private static readonly List<Experiencia> experiencias = new();
 
         public Experiencia Agregar(Experiencia experiencia)
         {
