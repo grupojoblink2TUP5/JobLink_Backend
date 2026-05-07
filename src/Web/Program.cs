@@ -5,6 +5,7 @@ using Application.Interfaces;
 using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Repositories;
+using Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,10 +28,10 @@ using (var command = connection.CreateCommand())
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlite(connection));
-
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 // CONSTRUCCION DE APP
 var app = builder.Build();
-
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

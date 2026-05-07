@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs.Company.Request;
+using Domain.Exceptions;
 
 namespace Web.Controllers
 {
@@ -26,14 +27,14 @@ namespace Web.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
-            var company = _companyService.GetCompanyById(id);
+           
+            
+                var company = _companyService.GetCompanyById(id);
 
-            if (company == null)
-            {
-                return NotFound($"Company with id {id} not found");
-            }
 
-            return Ok(company);
+                return Ok(company);
+            
+            
         }
 
         [HttpPost]

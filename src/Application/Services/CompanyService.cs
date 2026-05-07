@@ -2,6 +2,7 @@ using Application.DTOs.Company.Request;
 using Application.DTOs.Company.Response;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Interfaces;
 
 namespace Application.Services
@@ -32,13 +33,13 @@ namespace Application.Services
                 .ToList();
         }
 
-        public CompanyResponse? GetCompanyById(int id)
+        public CompanyResponse GetCompanyById(int id)
         {
             var company = _repository.GetById(id);
 
             if (company == null)
             {
-                return null;
+                throw new NotFoundException($"Company not found for id = {id}");
             }
 
             return MapToResponse(company);
