@@ -16,6 +16,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 // CONFIG DE LA BDD
 var connection = new SqliteConnection("Data Source=joblink.db");
 connection.Open();
