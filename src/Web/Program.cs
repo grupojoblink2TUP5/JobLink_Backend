@@ -5,7 +5,11 @@ using Application.Interfaces;
 using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Web.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +17,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // INYECCION DE DEPENDENCIAS
+builder.Services.AddScoped<
+    ICustomAuthenticationService, AuthenticationService>();
+
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
@@ -32,6 +39,31 @@ using (var command = connection.CreateCommand())
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlite(connection));
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = builder.Configuration["Authentication:Issuer"],
+
+                ValidAudience = builder.Configuration["Authentication:Audience"],
+
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(
+                        builder.Configuration["Authentication:SecretForKey"]!
+                    )
+                )
+            };
+    });
 // CONSTRUCCION DE APP
 var app = builder.Build();
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
@@ -46,6 +78,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
