@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs.Company.Request;
+using Microsoft.AspNetCore.Authorization;
 using Domain.Exceptions;
 
 namespace Web.Controllers
@@ -27,16 +28,17 @@ namespace Web.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
-           
-            
-                var company = _companyService.GetCompanyById(id);
 
 
-                return Ok(company);
-            
-            
+            var company = _companyService.GetCompanyById(id);
+
+
+            return Ok(company);
+
+
         }
 
+        [Authorize]
         [HttpPost]
         public IActionResult Create([FromBody] CreateCompanyRequest request)
         {

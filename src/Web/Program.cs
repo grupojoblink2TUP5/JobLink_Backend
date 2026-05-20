@@ -9,24 +9,83 @@ using Infrastructure.Services;
 using Web.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// CONTROLLERS
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 
-// INYECCION DE DEPENDENCIAS
-builder.Services.AddScoped<
-    ICustomAuthenticationService, AuthenticationService>();
 
+// OPENAPI / SWAGGER 
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer(
+        (document, context, cancellationToken) =>
+        {
+            var schemeName = "ApiBearerAuth";
+
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Description =
+                    "Paste the JWT token here."
+            };
+
+            document.Components ??= new OpenApiComponents();
+
+            document.Components.SecuritySchemes
+                ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+            document.Components.SecuritySchemes[schemeName]
+                = securityScheme;
+
+            var schemeReference =
+                new OpenApiSecuritySchemeReference(
+                    schemeName,
+                    document
+                );
+
+            var requirement =
+                new OpenApiSecurityRequirement
+                {
+                    [schemeReference] = []
+                };
+
+            document.Security =
+                new List<OpenApiSecurityRequirement>
+                {
+                    requirement
+                };
+
+            return Task.CompletedTask;
+        });
+});
+
+
+
+// INYECCION DE DEPENDENCIAS 
+
+// AUTH
+builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>();
+
+
+// COMPANY
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
+// USER
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// CONFIG DE LA BDD
+// MIDDLEWARE
+builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
+
+
+// CONFIG DE LA BDD 
 var connection = new SqliteConnection("Data Source=joblink.db");
 connection.Open();
 
@@ -38,9 +97,9 @@ using (var command = connection.CreateCommand())
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlite(connection));
-builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 
 
+// JWT AUTHENTICATION
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -64,19 +123,34 @@ builder.Services
                 )
             };
     });
-// CONSTRUCCION DE APP
+
+
+
+// APP
+
+
 var app = builder.Build();
+
+// GLOBAL EXCEPTION MIDDLEWARE
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
+// SWAGGER
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "My API V1");
+        options.SwaggerEndpoint(
+            "/openapi/v1.json",
+            "JobLink API V1"
+        );
+
+        options.RoutePrefix = string.Empty;
     });
 }
 
+// PIPELINE
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -85,4 +159,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+// RUN
 app.Run();
