@@ -8,6 +8,7 @@ namespace Infrastructure.Data
         // Persistir la entidad Company
         public DbSet<Company> Companies { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Experience> Experiences { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
