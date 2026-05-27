@@ -53,6 +53,13 @@ namespace Web.Controllers
             return CreatedAtAction(nameof(GetExperienceById), new { id = result.Id }, result);
         }
 
+        [HttpPut("{id:int}")]
+        public IActionResult Update([FromRoute] int id, [FromBody] UpdateExperienceRequest request)
+        {
+            var result = _experienceService.UpdateExperience(id, request);
+            return Ok(result);
+        }
+        
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
