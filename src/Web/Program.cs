@@ -81,6 +81,10 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// NOTIFICATION
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 // MIDDLEWARE
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 

@@ -91,6 +91,9 @@ public class GlobalExceptionHandlingMiddleware : IMiddleware
         }
         catch (Exception ex)
         {
+            var innerMessage = ex.InnerException?.Message ?? "Sin inner exception";
+            var innerInnerMessage = ex.InnerException?.InnerException?.Message ?? "";
+
             _logger.LogError(ex, ex.Message);
             int statusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.StatusCode = statusCode;
