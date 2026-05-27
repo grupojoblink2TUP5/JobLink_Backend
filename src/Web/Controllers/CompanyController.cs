@@ -17,6 +17,7 @@ namespace Web.Controllers
             _companyService = companyService;
         }
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -25,6 +26,7 @@ namespace Web.Controllers
             return Ok(companies);
         }
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
@@ -38,7 +40,7 @@ namespace Web.Controllers
 
         }
 
-        [Authorize]
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpPost]
         public IActionResult Create([FromBody] CreateCompanyRequest request)
         {
@@ -51,6 +53,7 @@ namespace Web.Controllers
             );
         }
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpPut("{id:int}")]
         public IActionResult Update(
             [FromRoute] int id,
@@ -69,6 +72,7 @@ namespace Web.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id:int}/approve")]
         public IActionResult Approve([FromRoute] int id)
         {
@@ -84,6 +88,7 @@ namespace Web.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id:int}/reject")]
         public IActionResult Reject([FromRoute] int id)
         {
@@ -99,6 +104,7 @@ namespace Web.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
