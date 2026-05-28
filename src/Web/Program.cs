@@ -139,8 +139,8 @@ var app = builder.Build();
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 // SWAGGER
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.MapOpenApi();
 
     app.UseSwaggerUI(options =>
@@ -152,7 +152,7 @@ if (app.Environment.IsDevelopment())
 
         options.RoutePrefix = string.Empty;
     });
-}
+//}
 
 // PIPELINE
 app.UseHttpsRedirection();
