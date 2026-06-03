@@ -150,7 +150,7 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
             "JobLink API V1"
         );
 
-        options.RoutePrefix = string.Empty;
+       
     });
 //}
 
