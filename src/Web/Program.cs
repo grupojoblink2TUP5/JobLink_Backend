@@ -90,7 +90,8 @@ builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 
 
 // CONFIG DE LA BDD 
-var connection = new SqliteConnection("Data Source=joblink.db");
+string connectionString = builder.Configuration["ConnectionStrings:SQLiteConnectionString"]!;
+var connection = new SqliteConnection(connectionString);
 connection.Open();
 
 using (var command = connection.CreateCommand())
@@ -150,7 +151,7 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
             "JobLink API V1"
         );
 
-        options.RoutePrefix = string.Empty;
+       
     });
 //}
 
