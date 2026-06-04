@@ -69,6 +69,9 @@ builder.Services.AddOpenApi(options =>
 
 // INYECCION DE DEPENDENCIAS 
 
+//CLOUDINARY
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 // AUTH
 builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>();
 
@@ -141,17 +144,17 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 // SWAGGER
 //if (app.Environment.IsDevelopment())
 //{
-    app.MapOpenApi();
+app.MapOpenApi();
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/openapi/v1.json",
-            "JobLink API V1"
-        );
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint(
+        "/openapi/v1.json",
+        "JobLink API V1"
+    );
 
-       
-    });
+
+});
 //}
 
 // PIPELINE
