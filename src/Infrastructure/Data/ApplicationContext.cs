@@ -10,6 +10,8 @@ namespace Infrastructure.Data
 
         public DbSet<Notification> Notifications { get; set; }
 
+        public DbSet<Candidate> Candidates { get; set; }
+
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {

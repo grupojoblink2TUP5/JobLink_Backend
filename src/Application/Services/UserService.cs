@@ -2,6 +2,7 @@ using Application.DTOs.User.Request;
 using Application.DTOs.User.Response;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
 
@@ -10,10 +11,12 @@ namespace Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _repository;
+        private readonly ICandidateRepository _candidateRepository;
 
-        public UserService(IUserRepository repository)
+        public UserService(IUserRepository repository, ICandidateRepository candidateRepository)
         {
             _repository = repository;
+            _candidateRepository = candidateRepository;
         }
 
         public List<UserResponse> GetAllUsers()
@@ -57,6 +60,13 @@ namespace Application.Services
             _repository.Create(user);
 
             _repository.SaveChanges();
+
+            if (user.Role == UserRole.Candidate)
+            {
+                var candidate = new Candidate(user);
+                _candidateRepository.Create(candidate);
+                _candidateRepository.SaveChanges();
+            }
 
             return MapToResponse(user);
         }
