@@ -144,6 +144,16 @@ builder.Services
 
 var app = builder.Build();
 
+#region Apply EF Migrations
+
+using (var serviceScopescope = app.Services.CreateScope())
+{
+    var dbContext = serviceScopescope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    dbContext.Database.Migrate();
+}
+
+#endregion
+
 // GLOBAL EXCEPTION MIDDLEWARE
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
