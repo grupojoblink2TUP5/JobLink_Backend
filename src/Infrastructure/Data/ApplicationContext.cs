@@ -9,6 +9,7 @@ namespace Infrastructure.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Experience> Experiences { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
