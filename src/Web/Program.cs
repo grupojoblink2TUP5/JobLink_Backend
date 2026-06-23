@@ -85,6 +85,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
+// APPLICATION HISTORY
+builder.Services.AddScoped<IApplicationHistoryRepository, ApplicationHistoryRepository>();
+builder.Services.AddScoped<IApplicationHistoryService, ApplicationHistoryService>();
+
 // MIDDLEWARE
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 
