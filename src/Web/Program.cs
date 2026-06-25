@@ -106,6 +106,14 @@ builder.Services.AddScoped<ICvService, CvService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
+// EXPERIENCE
+builder.Services.AddScoped<IExperienceRepository, ExperienceRepository>();
+builder.Services.AddScoped<IExperienceService, ExperienceService>();
+
+// EDUCATION
+builder.Services.AddScoped<IEducationRepository, EducationRepository>();
+builder.Services.AddScoped<IEducationService, EducationService>();
+
 // MIDDLEWARE
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
 
@@ -156,6 +164,16 @@ builder.Services
 
 
 var app = builder.Build();
+
+#region Apply EF Migrations
+
+using (var serviceScopescope = app.Services.CreateScope())
+{
+    var dbContext = serviceScopescope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    dbContext.Database.Migrate();
+}
+
+#endregion
 
 // GLOBAL EXCEPTION MIDDLEWARE
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();

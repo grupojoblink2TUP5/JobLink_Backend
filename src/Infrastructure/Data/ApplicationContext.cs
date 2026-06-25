@@ -11,6 +11,8 @@ namespace Infrastructure.Data
         public DbSet<Cv> Cvs { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Experience> Experiences { get; set; }
+        public DbSet<Education> Educations { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
