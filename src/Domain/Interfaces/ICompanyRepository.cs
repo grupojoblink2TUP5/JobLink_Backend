@@ -4,15 +4,13 @@ namespace Domain.Interfaces;
 
 public interface ICompanyRepository
 {
-    List<Company> GetAll();
+    Task<Company?> GetByIdAsync(int id);
 
-    Company? GetById(int id);
+    Task<List<Company>> GetAllAsync();
 
-    Company Create(Company company);
+    Task AddAsync(Company company);
 
-    void Update(Company company);
+    Task UpdateAsync(Company company);
 
-    void Delete(Company company);
-
-    void SaveChanges();
+    Task DeleteAsync(Company company);
 }

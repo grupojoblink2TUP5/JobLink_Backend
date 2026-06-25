@@ -1,36 +1,91 @@
+using System.Net.Http.Json;
+using Application.DTOs.Cloudinary.Response;
 using Application.Interfaces;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Services;
 
 public class CloudinaryService : ICloudinaryService
 {
-    private readonly Cloudinary _cloudinary;
+    private readonly HttpClient _httpClient;
+    private readonly IConfiguration _configuration;
 
-    public CloudinaryService(IConfiguration configuration)
+    public CloudinaryService(
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
-        var account = new Account(
-            configuration["CloudinarySettings:CloudName"],
-            configuration["CloudinarySettings:ApiKey"],
-            configuration["CloudinarySettings:ApiSecret"]
-        );
-        Console.WriteLine(configuration["CloudinarySettings:CloudName"]);
-        _cloudinary = new Cloudinary(account);
+        _httpClient =
+            httpClientFactory.CreateClient("Cloudinary");
+
+        _configuration = configuration;
     }
 
-    public async Task<string> UploadImageAsync(
+    public async Task<CloudinaryUploadResultDto> UploadImageAsync(
         Stream fileStream,
         string fileName)
     {
-        var uploadParams = new ImageUploadParams
+        using var content =
+            new MultipartFormDataContent();
+
+        content.Add(
+            new StreamContent(fileStream),
+            "file",
+            fileName);
+
+        content.Add(
+            new StringContent("joblink-preset"),
+            "\"upload_preset\"");
+
+        var response =
+            await _httpClient.PostAsync(
+                "image/upload",
+                content);
+
+        response.EnsureSuccessStatusCode();
+
+        var result =
+            await response.Content
+                .ReadFromJsonAsync<CloudinaryResponseDto>();
+
+        return new CloudinaryUploadResultDto
         {
-            File = new FileDescription(fileName, fileStream)
+            Url = result!.SecureUrl,
+            PublicId = result.PublicId
         };
+    }
 
-        var result = await _cloudinary.UploadAsync(uploadParams);
 
-        return result.SecureUrl.ToString();
+    public async Task<CloudinaryUploadResultDto> UploadDocumentAsync(
+    Stream stream,
+    string fileName)
+    {
+        using var content =
+            new MultipartFormDataContent();
+
+        content.Add(
+            new StreamContent(stream),
+            "file",
+            fileName);
+
+        content.Add(
+        new StringContent("joblink-preset"),
+        "\"upload_preset\"");
+
+        var response =
+            await _httpClient.PostAsync(
+                "raw/upload",
+                content);
+
+        response.EnsureSuccessStatusCode();
+
+        var result =
+        await response.Content
+            .ReadFromJsonAsync<CloudinaryResponseDto>();
+
+        return new CloudinaryUploadResultDto
+        {
+            Url = result!.SecureUrl,
+            PublicId = result.PublicId
+        };
     }
 }

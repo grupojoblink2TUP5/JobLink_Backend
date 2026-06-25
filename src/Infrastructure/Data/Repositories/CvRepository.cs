@@ -5,52 +5,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class CompanyRepository : ICompanyRepository
+public class CvRepository : ICvRepository
 {
     private readonly ApplicationContext _context;
 
-    public CompanyRepository(
+    public CvRepository(
         ApplicationContext context)
     {
         _context = context;
     }
 
-    public async Task<Company?> GetByIdAsync(int id)
+    public async Task<Cv?> GetByUserIdAsync(
+        int userId)
     {
-        return await _context.Companies
+        return await _context.Cvs
             .FirstOrDefaultAsync(
-                c => c.Id == id);
-    }
-
-    public async Task<List<Company>> GetAllAsync()
-    {
-        return await _context.Companies
-            .ToListAsync();
+                cv => cv.UserId == userId);
     }
 
     public async Task AddAsync(
-        Company company)
+        Cv cv)
     {
-        await _context.Companies.AddAsync(
-            company);
+        await _context.Cvs.AddAsync(cv);
 
         await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(
-        Company company)
+        Cv cv)
     {
-        _context.Companies.Update(
-            company);
+        _context.Cvs.Update(cv);
 
         await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(
-        Company company)
+        Cv cv)
     {
-        _context.Companies.Remove(
-            company);
+        _context.Cvs.Remove(cv);
 
         await _context.SaveChangesAsync();
     }

@@ -1,23 +1,36 @@
-namespace Domain.Entities
+namespace Domain.Entities;
+
+public class Cv
 {
-    public class Cv
+    public int Id { get; private set; }
+
+    public string Url { get; private set; }
+
+    public string PublicId { get; private set; }
+
+    public int UserId { get; private set; }
+
+    private Cv() 
     {
-        public int Id { get; private set; }
+        Url = string.Empty;
+        PublicId = string.Empty;
+    }
 
-        public string ArchivoUrl { get; private set; }
+    public Cv(
+        string url,
+        string publicId,
+        int userId)
+    {
+        Url = url;
+        PublicId = publicId;
+        UserId = userId;
+    }
 
-        // Relación con Candidato
-        public int CandidatoId { get; private set; }
-
-        public Cv(string archivoUrl, int candidatoId)
-        {
-            ArchivoUrl = archivoUrl;
-            CandidatoId = candidatoId;
-        }
-
-        public void ActualizarCv(string nuevaUrl)
-        {
-            ArchivoUrl = nuevaUrl;
-        }
+    public void Update(
+        string url,
+        string publicId)
+    {
+        Url = url;
+        PublicId = publicId;
     }
 }

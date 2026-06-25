@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20260623200524_add_table_cv")]
+    partial class add_table_cv
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
@@ -23,43 +26,31 @@ namespace Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("ApprovedByAdminId")
+                    b.Property<bool>("Approved")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("BusinessName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CreatedByRecruiterId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Cuit")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImagePublicId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Sector")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Industry")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Website")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

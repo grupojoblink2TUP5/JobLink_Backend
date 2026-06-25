@@ -69,7 +69,21 @@ builder.Services.AddOpenApi(options =>
 
 // INYECCION DE DEPENDENCIAS 
 
+
 //CLOUDINARY
+builder.Services.AddHttpClient(
+    "Cloudinary",
+    client =>
+    {
+        var cloudName =
+            builder.Configuration["CloudinarySettings:CloudName"];
+
+        client.BaseAddress =
+            new Uri(
+                $"https://api.cloudinary.com/v1_1/{cloudName}/"
+            );
+    });
+
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 // AUTH
@@ -83,6 +97,10 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 // USER
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+// CV
+builder.Services.AddScoped<ICvRepository, CvRepository>();
+builder.Services.AddScoped<ICvService, CvService>();
 
 // NOTIFICATION
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
