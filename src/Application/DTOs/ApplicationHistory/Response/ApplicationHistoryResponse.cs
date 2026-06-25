@@ -1,3 +1,4 @@
+using Domain.Enums;
 namespace Application.DTOs.ApplicationHistory.Response;
 
 public class ApplicationHistoryResponse
@@ -5,7 +6,7 @@ public class ApplicationHistoryResponse
     public int Id { get; init; }
     public int ApplicationId { get; init; }
     public int ChangedByRecruiterId { get; init; }
-    public string Status { get; init; } = string.Empty;
+    public ApplicationHistoryStatus Status { get; init; } = ApplicationHistoryStatus.Applied;
     public string? Description { get; init; }
     public DateTime ChangedAt { get; init; }
     public bool VisibleToCandidate { get; init; }
@@ -14,7 +15,7 @@ public class ApplicationHistoryResponse
         int id,
         int applicationId,
         int changedByRecruiterId,
-        string status,
+        ApplicationHistoryStatus status,
         string? description,
         DateTime changedAt,
         bool visibleToCandidate

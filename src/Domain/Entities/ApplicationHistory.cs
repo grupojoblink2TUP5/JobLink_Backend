@@ -1,9 +1,10 @@
+using Domain.Enums;
 namespace Domain.Entities
 {
     public class ApplicationHistory
     {
         public int Id { get; private set; }
-        public string Status { get; private set; }
+        public ApplicationHistoryStatus Status { get; private set; }
         public string? Description { get; private set; }
         public DateTime ChangedAt { get; private set; }
         public bool VisibleToCandidate { get; private set; }
@@ -15,7 +16,7 @@ namespace Domain.Entities
         public ApplicationHistory(
             int applicationId,
             int changedByRecruiterId,
-            string status,
+            ApplicationHistoryStatus status,
             string? description,
             bool visibleToCandidate = true
         )
@@ -28,7 +29,7 @@ namespace Domain.Entities
             ChangedAt = DateTime.UtcNow;
         }
 
-        public void Update(string status, string? description, bool visibleToCandidate)
+        public void Update(ApplicationHistoryStatus status, string? description, bool visibleToCandidate)
         {
             Status = status;
             Description = description;
