@@ -19,101 +19,116 @@ namespace Web.Controllers
 
         [Authorize(Roles = "Recruiter,Admin")]
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var companies = _companyService.GetAllCompanies();
-
-            return Ok(companies);
+            return Ok(
+                await _companyService
+                    .GetAllAsync());
         }
 
         [Authorize(Roles = "Recruiter,Admin")]
         [HttpGet("{id:int}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById(
+        int id)
         {
-
-
-            var company = _companyService.GetCompanyById(id);
-
-
-            return Ok(company);
-
-
+            return Ok(
+                await _companyService
+                    .GetByIdAsync(id));
         }
+
 
         [Authorize(Roles = "Recruiter,Admin")]
         [HttpPost]
-        public IActionResult Create([FromBody] CreateCompanyRequest request)
+        public async Task<IActionResult> Create(
+        CreateCompanyRequestDto request)
         {
-            var result = _companyService.CreateCompany(request);
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = result.Id },
-                result
-            );
+            return Ok(
+                await _companyService
+                    .CreateAsync(request));
         }
 
         [Authorize(Roles = "Recruiter,Admin")]
         [HttpPut("{id:int}")]
-        public IActionResult Update(
-            [FromRoute] int id,
-            [FromBody] UpdateCompanyRequest request
-        )
+        public async Task<IActionResult> Update(
+        int id,
+        UpdateCompanyRequestDto request)
         {
-            try
-            {
-                var updatedCompany = _companyService.UpdateCompany(id, request);
+            await _companyService
+                .UpdateAsync(id, request);
 
-                return Ok(updatedCompany);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            return NoContent();
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPatch("{id:int}/approve")]
-        public IActionResult Approve([FromRoute] int id)
-        {
-            try
-            {
-                var approvedCompany = _companyService.ApproveCompany(id);
 
-                return Ok(approvedCompany);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+        [HttpPost("{id:int}/logo")]
+        public async Task<IActionResult> UploadLogo(
+        int id,
+        IFormFile file)
+        {
+            using var stream =
+                file.OpenReadStream();
+
+            await _companyService
+                .UploadLogoAsync(
+                    id,
+                    stream,
+                    file.FileName);
+
+            return NoContent();
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPatch("{id:int}/reject")]
-        public IActionResult Reject([FromRoute] int id)
-        {
-            try
-            {
-                var rejectedCompany = _companyService.RejectCompany(id);
+        // [Authorize(Roles = "Admin")]
+        // [HttpPatch("{id:int}/approve")]
+        // public IActionResult Approve([FromRoute] int id)
+        // {
+        //     try
+        //     {
+        //         var approvedCompany = _companyService.ApproveCompany(id);
 
-                return Ok(rejectedCompany);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+        //         return Ok(approvedCompany);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return NotFound(ex.Message);
+        //     }
+        // }
+
+        // [Authorize(Roles = "Admin")]
+        // [HttpPatch("{id:int}/reject")]
+        // public IActionResult Reject([FromRoute] int id)
+        // {
+        //     try
+        //     {
+        //         var rejectedCompany = _companyService.RejectCompany(id);
+
+        //         return Ok(rejectedCompany);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return NotFound(ex.Message);
+        //     }
+        // }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete(
+            int id)
         {
-            var deleted = _companyService.DeleteCompany(id);
+            await _companyService
+                .DeleteAsync(id);
 
-            if (!deleted)
-            {
-                return NotFound($"Company with id {id} not found");
-            }
+            return NoContent();
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id:int}/approve")]
+        public async Task<IActionResult> Approve(int id, ApproveCompanyRequestDto request)
+        {
+            await _companyService
+                .ApproveAsync(
+                    id,
+                    request.AdminId);
 
             return NoContent();
         }

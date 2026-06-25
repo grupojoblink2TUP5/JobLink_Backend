@@ -69,6 +69,23 @@ builder.Services.AddOpenApi(options =>
 
 // INYECCION DE DEPENDENCIAS 
 
+
+//CLOUDINARY
+builder.Services.AddHttpClient(
+    "Cloudinary",
+    client =>
+    {
+        var cloudName =
+            builder.Configuration["CloudinarySettings:CloudName"];
+
+        client.BaseAddress =
+            new Uri(
+                $"https://api.cloudinary.com/v1_1/{cloudName}/"
+            );
+    });
+
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 // AUTH
 builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>();
 
@@ -80,6 +97,10 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 // USER
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+// CV
+builder.Services.AddScoped<ICvRepository, CvRepository>();
+builder.Services.AddScoped<ICvService, CvService>();
 
 // NOTIFICATION
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -160,17 +181,17 @@ app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 // SWAGGER
 //if (app.Environment.IsDevelopment())
 //{
-    app.MapOpenApi();
+app.MapOpenApi();
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/openapi/v1.json",
-            "JobLink API V1"
-        );
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint(
+        "/openapi/v1.json",
+        "JobLink API V1"
+    );
 
-       
-    });
+
+});
 //}
 
 // PIPELINE

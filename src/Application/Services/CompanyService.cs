@@ -5,151 +5,148 @@ using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
 
-namespace Application.Services
+namespace Application.Services;
+
+public class CompanyService : ICompanyService
 {
-    public class CompanyService : ICompanyService
+    private readonly ICompanyRepository _companyRepository;
+    private readonly ICloudinaryService _cloudinaryService;
+
+    public CompanyService(
+        ICompanyRepository companyRepository,
+        ICloudinaryService cloudinaryService)
     {
-        private readonly ICompanyRepository _repository;
+        _companyRepository = companyRepository;
+        _cloudinaryService = cloudinaryService;
+    }
 
-        public CompanyService(ICompanyRepository repository)
+    public async Task<CompanyResponseDto> CreateAsync(
+        CreateCompanyRequestDto request)
+    {
+        var company = new Company(
+            request.BusinessName,
+            request.Cuit,
+            request.Sector,
+            request.Description,
+            request.Website,
+            request.CreatedByRecruiterId);
+
+        await _companyRepository.AddAsync(company);
+
+        return MapToResponse(company);
+    }
+
+    public async Task<List<CompanyResponseDto>> GetAllAsync()
+    {
+        var companies =
+            await _companyRepository.GetAllAsync();
+
+        return companies
+            .Select(MapToResponse)
+            .ToList();
+    }
+
+    public async Task<CompanyResponseDto?> GetByIdAsync(
+        int id)
+    {
+        var company =
+            await _companyRepository.GetByIdAsync(id);
+
+        if (company is null)
+            return null;
+
+        return MapToResponse(company);
+    }
+
+    public async Task UpdateAsync(
+        int id,
+        UpdateCompanyRequestDto request)
+    {
+        var company =
+            await _companyRepository.GetByIdAsync(id);
+
+        if (company is null)
+            throw new Exception("Company not found");
+
+        company.Update(
+            request.BusinessName,
+            request.Sector,
+            request.Description,
+            request.Website);
+
+        await _companyRepository.UpdateAsync(company);
+    }
+
+    public async Task DeleteAsync(
+        int id)
+    {
+        var company =
+            await _companyRepository.GetByIdAsync(id);
+
+        if (company is null)
+            throw new Exception("Company not found");
+
+        await _companyRepository.DeleteAsync(company);
+    }
+
+    public async Task UploadLogoAsync(
+        int companyId,
+        Stream stream,
+        string fileName)
+    {
+        var company =
+            await _companyRepository.GetByIdAsync(companyId);
+
+        if (company is null)
+            throw new Exception("Company not found");
+
+        var uploadResult =
+            await _cloudinaryService
+                .UploadImageAsync(
+                    stream,
+                    fileName);
+
+        company.SetLogo(
+            uploadResult.Url,
+            uploadResult.PublicId);
+
+        await _companyRepository.UpdateAsync(company);
+    }
+
+    private static CompanyResponseDto MapToResponse(
+        Company company)
+    {
+        return new CompanyResponseDto
         {
-            _repository = repository;
-        }
+            Id = company.Id,
+            BusinessName = company.BusinessName,
+            ImageUrl = company.ImageUrl,
+            Cuit = company.Cuit,
+            Sector = company.Sector,
+            Description = company.Description,
+            Website = company.Website,
+            Status = company.Status,
+            CreatedAt = company.CreatedAt,
+            CreatedByRecruiterId = company.CreatedByRecruiterId,
+            ApprovedAt = company.ApprovedAt,
+            ApprovedByAdminId = company.ApprovedByAdminId
+        };
+    }
 
-        public List<CompanyResponse> GetAllCompanies()
-        {
-            return _repository
-                .GetAll()
-                .Select(company => new CompanyResponse(
-                    company.Id,
-                    company.BusinessName,
-                    company.Cuit,
-                    company.Industry,
-                    company.Description,
-                    company.Website,
-                    company.Location,
-                    company.Approved
-                ))
-                .ToList();
-        }
+    public async Task ApproveAsync(
+    int companyId,
+    int adminId)
+    {
+        var company =
+            await _companyRepository
+                .GetByIdAsync(companyId);
 
-        public CompanyResponse GetCompanyById(int id)
-        {
-            var company = _repository.GetById(id);
+        if (company is null)
+            throw new Exception("Company not found");
 
-            if (company == null)
-            {
-                throw new NotFoundException($"Company not found for id = {id}");
-            }
+        company.Approve(adminId);
 
-            return MapToResponse(company);
-        }
-
-        public CompanyResponse CreateCompany(CreateCompanyRequest request)
-        {
-            var company = new Company(
-                request.BusinessName!,
-                request.Cuit!,
-                request.Industry!,
-                request.Description!,
-                request.Website!,
-                request.Location!
-            );
-
-            _repository.Create(company);
-
-            _repository.SaveChanges();
-
-            return MapToResponse(company);
-        }
-
-        public CompanyResponse UpdateCompany(int id, UpdateCompanyRequest request)
-        {
-            var company = _repository.GetById(id);
-
-            if (company == null)
-            {
-                throw new Exception("Company not found");
-            }
-
-            company.Update(
-                request.Industry,
-                request.Description,
-                request.Website,
-                request.Location
-            );
-
-            _repository.Update(company);
-
-            _repository.SaveChanges();
-
-            return MapToResponse(company);
-        }
-
-        public bool DeleteCompany(int id)
-        {
-            var company = _repository.GetById(id);
-
-            if (company == null)
-            {
-                return false;
-            }
-
-            _repository.Delete(company);
-
-            _repository.SaveChanges();
-
-            return true;
-        }
-
-        public CompanyResponse ApproveCompany(int id)
-        {
-            var company = _repository.GetById(id);
-
-            if (company == null)
-            {
-                throw new Exception("Company not found");
-            }
-
-            company.Approve();
-
-            _repository.Update(company);
-
-            _repository.SaveChanges();
-
-            return MapToResponse(company);
-        }
-
-        public CompanyResponse RejectCompany(int id)
-        {
-            var company = _repository.GetById(id);
-
-            if (company == null)
-            {
-                throw new Exception("Company not found");
-            }
-
-            company.Reject();
-
-            _repository.Update(company);
-
-            _repository.SaveChanges();
-
-            return MapToResponse(company);
-        }
-
-        private static CompanyResponse MapToResponse(Company company)
-        {
-            return new CompanyResponse(
-                company.Id,
-                company.BusinessName,
-                company.Cuit,
-                company.Industry,
-                company.Description,
-                company.Website,
-                company.Location,
-                company.Approved
-            );
-        }
+        await _companyRepository
+            .UpdateAsync(company);
     }
 }
