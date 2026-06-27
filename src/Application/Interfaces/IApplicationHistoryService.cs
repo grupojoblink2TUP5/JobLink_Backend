@@ -13,12 +13,12 @@ public interface IApplicationHistoryService
 
     ApplicationHistoryResponse CreateApplicationHistory(
         int applicationId,
-        CreateApplicationRequest request
+        CreateApplicationHistoryRequest request
     );
 
     ApplicationHistoryResponse UpdateApplicationHistory(
         int id,
-        UpdateApplicationRequest request
+        UpdateApplicationHistoryRequest request
     );
 
     bool DeleteApplicationHistory(int id);

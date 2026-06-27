@@ -48,7 +48,7 @@ namespace Web.Controllers
         [HttpPost("application/{applicationId:int}")]
         public IActionResult Create(
             [FromRoute] int applicationId,
-            [FromBody] CreateApplicationRequest request
+            [FromBody] CreateApplicationHistoryRequest request
         )
         {
             var result = _applicationHistoryService.CreateApplicationHistory(
@@ -66,7 +66,7 @@ namespace Web.Controllers
         [HttpPut("{id:int}")]
         public IActionResult Update(
             [FromRoute] int id,
-            [FromBody] UpdateApplicationRequest request
+            [FromBody] UpdateApplicationHistoryRequest request
         )
         {
             try

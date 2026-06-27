@@ -32,14 +32,11 @@ public class ApplicationHistoryService : IApplicationHistoryService
 
     public ApplicationHistoryResponse CreateApplicationHistory(
         int applicationId,
-        CreateApplicationRequest request)
+        CreateApplicationHistoryRequest request)
     {
-        // TODO: Obtener desde el token en el controlador
-        var changedByRecruiterId = 1;
-
         var entity = new ApplicationHistory(
             applicationId,
-            changedByRecruiterId,
+            request.ChangedByRecruiterId,
             request.Status,
             request.Description,
             request.VisibleToCandidate
@@ -53,7 +50,7 @@ public class ApplicationHistoryService : IApplicationHistoryService
 
     public ApplicationHistoryResponse UpdateApplicationHistory(
         int id,
-        UpdateApplicationRequest request)
+        UpdateApplicationHistoryRequest request)
     {
         var entity = _repository.GetById(id)
             ?? throw new NotFoundException($"ApplicationHistory no encontrado con id = {id}");
