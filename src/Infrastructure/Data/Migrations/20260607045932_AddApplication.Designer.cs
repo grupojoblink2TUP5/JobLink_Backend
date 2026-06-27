@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,41 +11,21 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20260607045932_AddApplication")]
+    partial class AddApplication
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
 
-<<<<<<< HEAD
-            modelBuilder.Entity("Domain.Entities.ApplicationHistory", b =>
-=======
             modelBuilder.Entity("Domain.Entities.Application", b =>
->>>>>>> crud-application
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-<<<<<<< HEAD
-                    b.Property<int>("ApplicationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ChangedByRecruiterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("VisibleToCandidate")
-=======
                     b.Property<DateTime>("AppliedAt")
                         .HasColumnType("TEXT");
 
@@ -56,16 +37,11 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
->>>>>>> crud-application
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-<<<<<<< HEAD
-                    b.ToTable("ApplicationHistories");
-=======
                     b.ToTable("Applications");
->>>>>>> crud-application
                 });
 
             modelBuilder.Entity("Domain.Entities.Company", b =>

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
+using ApplicationEntity = Domain.Entities.Application;
 
 namespace Infrastructure.Data
 {
@@ -9,6 +10,7 @@ namespace Infrastructure.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<ApplicationEntity> Applications { get; set; }
 
         public DbSet<ApplicationHistory> ApplicationHistories { get; set; }
 
