@@ -1,53 +1,57 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Repositories;
+
+public class UserRepository : IUserRepository
 {
-    public class UserRepository : IUserRepository
+    private readonly ApplicationContext _context;
+
+    public UserRepository(ApplicationContext context)
     {
-        private readonly ApplicationContext _context;
+        _context = context;
+    }
 
-        public UserRepository(ApplicationContext context)
-        {
-            _context = context;
-        }
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await _context.Users.ToListAsync();
+    }
 
-        public List<User> GetAll()
-        {
-            return _context.Users.ToList();
-        }
+    public async Task<User?> GetByIdAsync(int id)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
 
-        public User? GetById(int id)
-        {
-            return _context.Users.FirstOrDefault(c => c.Id == id);
-        }
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }
 
-        public User? GetByEmail(string email)
-        {
-            return _context.Users.FirstOrDefault(u => u.Email == email);
-        }
+    public async Task AddAsync(User user)
+    {
+        await _context.Users.AddAsync(user);
+    }
 
-        public User Create(User user)
-        {
-            _context.Users.Add(user);
+    public Task UpdateAsync(User user)
+    {
+        _context.Users.Update(user);
 
-            return user;
-        }
+        return Task.CompletedTask;
+    }
 
-        public void Update(User user)
-        {
-            _context.Users.Update(user);
-        }
+    public Task DeleteAsync(User user)
+    {
+        _context.Users.Remove(user);
 
-        public void Delete(User user)
-        {
-            _context.Users.Remove(user);
-        }
+        return Task.CompletedTask;
+    }
 
-        public void SaveChanges()
-        {
-            _context.SaveChanges();
-        }
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 }

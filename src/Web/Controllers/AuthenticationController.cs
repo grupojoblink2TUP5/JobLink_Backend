@@ -11,18 +11,17 @@ public class AuthenticationController : ControllerBase
     private readonly ICustomAuthenticationService _service;
 
     public AuthenticationController(
-        ICustomAuthenticationService service
-    )
+        ICustomAuthenticationService service)
     {
         _service = service;
     }
 
     [HttpPost]
-    public IActionResult Authenticate(
-        [FromBody] AuthenticationRequest request
-    )
+    public async Task<IActionResult> Authenticate(
+        [FromBody] AuthenticationRequest request)
     {
-        var token = _service.Authenticate(request);
+        var token =
+            await _service.AuthenticateAsync(request);
 
         return Ok(token);
     }

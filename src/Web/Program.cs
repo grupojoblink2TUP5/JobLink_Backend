@@ -94,6 +94,10 @@ builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>(
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
+// JOB OFFER
+builder.Services.AddScoped<IJobOfferRepository, JobOfferRepository>();
+builder.Services.AddScoped<IJobOfferService, JobOfferService>();
+
 // USER
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
