@@ -1,48 +1,57 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.Repositories;
+
+public class CompanyRepository : ICompanyRepository
 {
-    public class CompanyRepository : ICompanyRepository
+    private readonly ApplicationContext _context;
+
+    public CompanyRepository(
+        ApplicationContext context)
     {
-        private readonly ApplicationContext _context;
+        _context = context;
+    }
 
-        public CompanyRepository(ApplicationContext context)
-        {
-            _context = context;
-        }
+    public async Task<Company?> GetByIdAsync(int id)
+    {
+        return await _context.Companies
+            .FirstOrDefaultAsync(
+                c => c.Id == id);
+    }
 
-        public List<Company> GetAll()
-        {
-            return _context.Companies.ToList();
-        }
+    public async Task<List<Company>> GetAllAsync()
+    {
+        return await _context.Companies
+            .ToListAsync();
+    }
 
-        public Company? GetById(int id)
-        {
-            return _context.Companies.FirstOrDefault(c => c.Id == id);
-        }
+    public async Task AddAsync(
+        Company company)
+    {
+        await _context.Companies.AddAsync(
+            company);
 
-        public Company Create(Company company)
-        {
-            _context.Companies.Add(company);
+        await _context.SaveChangesAsync();
+    }
 
-            return company;
-        }
+    public async Task UpdateAsync(
+        Company company)
+    {
+        _context.Companies.Update(
+            company);
 
-        public void Update(Company company)
-        {
-            _context.Companies.Update(company);
-        }
+        await _context.SaveChangesAsync();
+    }
 
-        public void Delete(Company company)
-        {
-            _context.Companies.Remove(company);
-        }
+    public async Task DeleteAsync(
+        Company company)
+    {
+        _context.Companies.Remove(
+            company);
 
-        public void SaveChanges()
-        {
-            _context.SaveChanges();
-        }
+        await _context.SaveChangesAsync();
     }
 }

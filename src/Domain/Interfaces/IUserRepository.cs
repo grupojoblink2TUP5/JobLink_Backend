@@ -4,17 +4,17 @@ namespace Domain.Interfaces;
 
 public interface IUserRepository
 {
-    List<User> GetAll();
+    Task<List<User>> GetAllAsync();
 
-    User? GetById(int id);
+    Task<User?> GetByIdAsync(int id);
 
-    User? GetByEmail(string email);
+    Task<User?> GetByEmailAsync(string email);
 
-    User Create(User user);
+    Task AddAsync(User user);
 
-    void Update(User user);
+    Task UpdateAsync(User user);
 
-    void Delete(User user);
+    Task DeleteAsync(User user);
 
-    void SaveChanges();
+    Task SaveChangesAsync();
 }

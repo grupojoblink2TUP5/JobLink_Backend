@@ -69,6 +69,23 @@ builder.Services.AddOpenApi(options =>
 
 // INYECCION DE DEPENDENCIAS 
 
+
+//CLOUDINARY
+builder.Services.AddHttpClient(
+    "Cloudinary",
+    client =>
+    {
+        var cloudName =
+            builder.Configuration["CloudinarySettings:CloudName"];
+
+        client.BaseAddress =
+            new Uri(
+                $"https://api.cloudinary.com/v1_1/{cloudName}/"
+            );
+    });
+
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 // AUTH
 builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>();
 
@@ -80,10 +97,17 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 // APPLICATION
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+// JOB OFFER
+builder.Services.AddScoped<IJobOfferRepository, JobOfferRepository>();
+builder.Services.AddScoped<IJobOfferService, JobOfferService>();
 
 // USER
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+// CV
+builder.Services.AddScoped<ICvRepository, CvRepository>();
+builder.Services.AddScoped<ICvService, CvService>();
 
 // NOTIFICATION
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -92,6 +116,13 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 // APPLICATION HISTORY
 builder.Services.AddScoped<IApplicationHistoryRepository, ApplicationHistoryRepository>();
 builder.Services.AddScoped<IApplicationHistoryService, ApplicationHistoryService>();
+// EXPERIENCE
+builder.Services.AddScoped<IExperienceRepository, ExperienceRepository>();
+builder.Services.AddScoped<IExperienceService, ExperienceService>();
+
+// EDUCATION
+builder.Services.AddScoped<IEducationRepository, EducationRepository>();
+builder.Services.AddScoped<IEducationService, EducationService>();
 
 // MIDDLEWARE
 builder.Services.AddTransient<GlobalExceptionHandlingMiddleware>();
@@ -144,23 +175,33 @@ builder.Services
 
 var app = builder.Build();
 
+#region Apply EF Migrations
+
+using (var serviceScopescope = app.Services.CreateScope())
+{
+    var dbContext = serviceScopescope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    dbContext.Database.Migrate();
+}
+
+#endregion
+
 // GLOBAL EXCEPTION MIDDLEWARE
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 // SWAGGER
 //if (app.Environment.IsDevelopment())
 //{
-    app.MapOpenApi();
+app.MapOpenApi();
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint(
-            "/openapi/v1.json",
-            "JobLink API V1"
-        );
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint(
+        "/openapi/v1.json",
+        "JobLink API V1"
+    );
 
-       
-    });
+
+});
 //}
 
 // PIPELINE

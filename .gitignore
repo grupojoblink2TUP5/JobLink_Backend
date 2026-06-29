@@ -29,3 +29,6 @@ appsettings.Development.json
 # NuGet
 *.nupkg
 packages/
+
+# bdd
+joblink.db

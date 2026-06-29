@@ -18,48 +18,55 @@ public class AuthenticationService : ICustomAuthenticationService
 
     public AuthenticationService(
         IUserRepository repository,
-        IConfiguration configuration
-    )
+        IConfiguration configuration)
     {
         _repository = repository;
         _configuration = configuration;
     }
 
-    public string Authenticate(AuthenticationRequest request)
+    public async Task<string> AuthenticateAsync(
+        AuthenticationRequest request)
     {
-        var user = _repository.GetByEmail(request.Email!);
+        var user =
+            await _repository.GetByEmailAsync(
+                request.Email!);
 
-        if (user == null || user.Password != request.Password)
+        if (user is null || user.Password != request.Password)
         {
             throw new InvalidCredentialsException();
         }
 
         var securityKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(
-                _configuration["Authentication:SecretForKey"]!
-            )
-        );
+                _configuration["Authentication:SecretForKey"]!));
 
         var credentials = new SigningCredentials(
             securityKey,
-            SecurityAlgorithms.HmacSha256
-        );
+            SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
         {
-            new Claim("sub", user.Id.ToString()),
-            new Claim("role", user.Role.ToString()),
-            new Claim("email", user.Email)
+            new Claim(
+                ClaimTypes.NameIdentifier,
+                user.Id.ToString()),
+
+            new Claim(
+                ClaimTypes.Role,
+                user.Role.ToString()),
+
+            new Claim(
+                ClaimTypes.Email,
+                user.Email)
         };
 
         var token = new JwtSecurityToken(
-            _configuration["Authentication:Issuer"],
-            _configuration["Authentication:Audience"],
-            claims,
+            issuer: _configuration["Authentication:Issuer"],
+            audience: _configuration["Authentication:Audience"],
+            claims: claims,
             expires: DateTime.UtcNow.AddHours(1),
-            signingCredentials: credentials
-        );
+            signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtSecurityTokenHandler()
+            .WriteToken(token);
     }
 }

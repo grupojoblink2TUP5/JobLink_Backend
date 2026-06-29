@@ -1,41 +1,28 @@
 namespace Application.DTOs.Company.Response;
 
-public class CompanyResponse
+public class CompanyResponseDto
 {
-    public int Id { get; init; }
+    public int Id { get; set; }
 
-    public string? BusinessName { get; init; }
+    public string BusinessName { get; set; } = string.Empty;
 
-    public string? Cuit { get; init; }
+    public string? ImageUrl { get; set; }
 
-    public string? Industry { get; init; }
+    public string Cuit { get; set; } = string.Empty;
 
-    public string? Description { get; init; }
+    public string Sector { get; set; } = string.Empty;
 
-    public string? Website { get; init; }
+    public string? Description { get; set; }
 
-    public string? Location { get; init; }
+    public string? Website { get; set; }
 
-    public bool Approved { get; init; }
+    public bool Status { get; set; }
 
-    public CompanyResponse(
-        int id,
-        string? businessName,
-        string? cuit,
-        string? industry,
-        string? description,
-        string? website,
-        string? location,
-        bool approved
-    )
-    {
-        Id = id;
-        BusinessName = businessName;
-        Cuit = cuit;
-        Industry = industry;
-        Description = description;
-        Website = website;
-        Location = location;
-        Approved = approved;
-    }
+    public DateTime CreatedAt { get; set; }
+
+    public int CreatedByRecruiterId { get; set; }
+
+    public DateTime? ApprovedAt { get; set; }
+
+    public int? ApprovedByAdminId { get; set; }
 }

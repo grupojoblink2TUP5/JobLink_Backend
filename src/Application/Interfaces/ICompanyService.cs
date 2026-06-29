@@ -5,17 +5,27 @@ namespace Application.Interfaces;
 
 public interface ICompanyService
 {
-    List<CompanyResponse> GetAllCompanies();
+    Task<CompanyResponseDto> CreateAsync(
+        CreateCompanyRequestDto request);
 
-    CompanyResponse? GetCompanyById(int id);
+    Task<List<CompanyResponseDto>> GetAllAsync();
 
-    CompanyResponse CreateCompany(CreateCompanyRequest request);
+    Task<CompanyResponseDto?> GetByIdAsync(
+        int id);
 
-    CompanyResponse UpdateCompany(int id, UpdateCompanyRequest request);
+    Task UpdateAsync(
+        int id,
+        UpdateCompanyRequestDto request);
 
-    bool DeleteCompany(int id);
+    Task DeleteAsync(
+        int id);
 
-    CompanyResponse ApproveCompany(int id);
+    Task UploadLogoAsync(
+        int companyId,
+        Stream stream,
+        string fileName);
 
-    CompanyResponse RejectCompany(int id);
+    Task ApproveAsync(
+        int companyId,
+        int adminId);
 }
