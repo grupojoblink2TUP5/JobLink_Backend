@@ -1,9 +1,10 @@
+using Domain.Enums;
 namespace Domain.Entities
 {
     public class Application
     {
         public int Id { get; private set; }
-        public string CurrentStatus { get; private set; }
+        public ApplicationStatus CurrentStatus { get; private set; }
         public DateTime AppliedAt { get; private set; }
 
         // Relaciones
@@ -15,10 +16,10 @@ namespace Domain.Entities
             UserId = userId;
             OfferId = offerId;
             AppliedAt = DateTime.Now;
-            CurrentStatus = "En revisión";
+            CurrentStatus = ApplicationStatus.Applied;
         }
 
-        public void UpdateStatus(string newStatus)
+        public void UpdateStatus(ApplicationStatus newStatus)
         {
             CurrentStatus = newStatus;
         }

@@ -6,7 +6,7 @@ public class ApplicationHistoryResponse
     public int Id { get; init; }
     public int ApplicationId { get; init; }
     public int ChangedByRecruiterId { get; init; }
-    public ApplicationHistoryStatus Status { get; init; } = ApplicationHistoryStatus.Applied;
+    public ApplicationStatus Status { get; init; } = ApplicationStatus.Applied;
     public string? Description { get; init; }
     public DateTime ChangedAt { get; init; }
     public bool VisibleToCandidate { get; init; }
@@ -15,7 +15,7 @@ public class ApplicationHistoryResponse
         int id,
         int applicationId,
         int changedByRecruiterId,
-        ApplicationHistoryStatus status,
+        ApplicationStatus status,
         string? description,
         DateTime changedAt,
         bool visibleToCandidate

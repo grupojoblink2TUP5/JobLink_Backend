@@ -1,6 +1,6 @@
 namespace Domain.Enums;
 
-public enum ApplicationHistoryStatus
+public enum ApplicationStatus
 {
     Applied,
     CvRead,

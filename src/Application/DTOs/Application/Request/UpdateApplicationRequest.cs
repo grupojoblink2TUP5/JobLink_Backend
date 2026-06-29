@@ -1,6 +1,7 @@
+﻿using Domain.Enums;
 namespace Application.DTOs.Application.Request;
 
 public class UpdateApplicationRequest
 {
-    public string? CurrentStatus { get; set; }
+    public ApplicationStatus CurrentStatus { get; set; }
 }

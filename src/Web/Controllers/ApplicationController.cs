@@ -28,13 +28,15 @@ namespace Web.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
-            var application = _applicationService.GetApplicationById(id);
-            if (application == null)
+            try
+            {
+                var application = _applicationService.GetApplicationById(id);
+                return Ok(application);
+            }
+            catch (NotFoundException)
             {
                 return NotFound();
             }
-
-            return Ok(application);
         }
 
         [HttpGet("user/{userId:int}")]
@@ -56,9 +58,7 @@ namespace Web.Controllers
         {
             var application = _applicationService.GetApplicationByUserIdAndOfferId(userId, offerId);
             if (application == null)
-            {
                 return NotFound();
-            }
 
             return Ok(application);
         }
@@ -67,20 +67,21 @@ namespace Web.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] CreateApplicationRequest request)
         {
-            var roleClaim = User.FindFirst("role")?.Value;
-            if (roleClaim != "Candidate")
-            {
-                return Forbid();
-            }
+            var userIdClaim = User.FindFirstValue("sub")
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var userIdClaim = User.FindFirst("sub")?.Value;
             if (!int.TryParse(userIdClaim, out var userId))
-            {
                 return Unauthorized();
-            }
 
-            var result = _applicationService.CreateApplication(userId, request);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            try
+            {
+                var result = _applicationService.CreateApplication(userId, request);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (DuplicateApplicationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [Authorize]
@@ -104,9 +105,7 @@ namespace Web.Controllers
         {
             var deleted = _applicationService.DeleteApplication(id);
             if (!deleted)
-            {
                 return NotFound();
-            }
 
             return NoContent();
         }

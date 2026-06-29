@@ -10,10 +10,14 @@ namespace Application.Services;
 public class ApplicationHistoryService : IApplicationHistoryService
 {
     private readonly IApplicationHistoryRepository _repository;
+    private readonly IApplicationRepository _applicationRepository;
 
-    public ApplicationHistoryService(IApplicationHistoryRepository repository)
+    public ApplicationHistoryService(
+        IApplicationHistoryRepository repository,
+        IApplicationRepository applicationRepository)
     {
         _repository = repository;
+        _applicationRepository = applicationRepository;
     }
 
     public List<ApplicationHistoryResponse> GetAllApplicationHistories()
@@ -45,6 +49,15 @@ public class ApplicationHistoryService : IApplicationHistoryService
         _repository.Create(entity);
         _repository.SaveChanges();
 
+        // Sincronizar CurrentStatus en Application
+        var application = _applicationRepository.GetById(applicationId);
+        if (application != null)
+        {
+            application.UpdateStatus(request.Status);
+            _applicationRepository.Update(application);
+            _applicationRepository.SaveChanges();
+        }
+
         return MapToResponse(entity);
     }
 
@@ -59,6 +72,15 @@ public class ApplicationHistoryService : IApplicationHistoryService
 
         _repository.Update(entity);
         _repository.SaveChanges();
+
+        // Sincronizar CurrentStatus en Application con el último history
+        var application = _applicationRepository.GetById(entity.ApplicationId);
+        if (application != null)
+        {
+            application.UpdateStatus(entity.Status);
+            _applicationRepository.Update(application);
+            _applicationRepository.SaveChanges();
+        }
 
         return MapToResponse(entity);
     }
