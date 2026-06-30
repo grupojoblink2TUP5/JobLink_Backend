@@ -2,9 +2,9 @@ using Application.DTOs.JobOffer.Request;
 using Application.DTOs.JobOffer.Response;
 using Application.Interfaces;
 using Domain.Entities;
-using Domain.Interfaces;
-using Domain.Exceptions;
 using Domain.Enums;
+using Domain.Exceptions;
+using Domain.Interfaces;
 
 namespace Application.Services;
 
@@ -15,9 +15,9 @@ public class JobOfferService : IJobOfferService
     private readonly IUserRepository _userRepository;
 
     public JobOfferService(
-    IJobOfferRepository jobOfferRepository,
-    ICompanyRepository companyRepository,
-    IUserRepository userRepository)
+        IJobOfferRepository jobOfferRepository,
+        ICompanyRepository companyRepository,
+        IUserRepository userRepository)
     {
         _jobOfferRepository = jobOfferRepository;
         _companyRepository = companyRepository;
@@ -25,54 +25,54 @@ public class JobOfferService : IJobOfferService
     }
 
     public async Task<JobOfferResponseDto> CreateAsync(
-    CreateJobOfferRequestDto request)
+        CreateJobOfferRequestDto request)
     {
-        var company =
-    await _companyRepository
-        .GetByIdAsync(request.CompanyId);
-
-        if (company is null)
+        if (string.IsNullOrWhiteSpace(request.JobTitle))
         {
-            throw new NotFoundException(
-                $"Company not found. Id = {request.CompanyId}");
+            throw new FieldRequiredException("JobTitle");
         }
+
+        if (string.IsNullOrWhiteSpace(request.Description))
+        {
+            throw new FieldRequiredException("Description");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Location))
+        {
+            throw new FieldRequiredException("Location");
+        }
+
+        var company =
+            await GetCompanyOrThrowAsync(
+                request.CompanyId);
 
         if (!company.Status)
-        {
-            throw new InvalidOperationException(
-                "Company has not been approved.");
-        }
+            throw new CompanyNotApprovedException(
+                company.BusinessName);
 
         var recruiter =
-            await _userRepository
-                .GetByIdAsync(
-                    request.CreatedByRecruiterId);
-
-        if (recruiter is null)
-        {
-            throw new NotFoundException(
-                $"Recruiter not found. Id = {request.CreatedByRecruiterId}");
-        }
+            await GetRecruiterOrThrowAsync(
+                request.CreatedByRecruiterId);
 
         if (recruiter.Role != UserRole.Recruiter)
-        {
-            throw new InvalidOperationException(
-                "The specified user is not a recruiter.");
-        }
+            throw new UserIsNotRecruiterException(
+                recruiter.Email);
 
         if (company.CreatedByRecruiterId != recruiter.Id)
-        {
-            throw new InvalidOperationException(
-                "The recruiter does not own this company.");
-        }
+            throw new RecruiterDoesNotOwnCompanyException();
 
         if (request.Salary <= 0)
-            throw new ArgumentException(
-                "Salary must be greater than zero.");
+            throw new InvalidSalaryException(
+                request.Salary);
+
+        if (!Enum.IsDefined(typeof(OfferType), request.OfferType))
+        {
+            throw new InvalidOfferTypeException(request.OfferType);
+        }
 
         if (request.ClosingDate <= DateTime.UtcNow)
-            throw new ArgumentException(
-                "Closing date must be in the future.");
+            throw new InvalidClosingDateException(
+                request.ClosingDate);
 
         var jobOffer = new JobOffer(
             request.JobTitle,
@@ -99,17 +99,15 @@ public class JobOfferService : IJobOfferService
             .ToList();
     }
 
-    public async Task<JobOfferResponseDto?> GetByIdAsync(
-        int id)
+    public async Task<JobOfferResponseDto> GetByIdAsync(int id)
     {
         var offer =
-            await _jobOfferRepository.GetByIdAsync(id);
-
-        if (offer is null)
-            return null;
+            await GetJobOfferOrThrowAsync(id);
 
         return MapToResponse(offer);
     }
+
+
 
     public async Task<List<JobOfferResponseDto>>
         GetByCompanyIdAsync(int companyId)
@@ -139,12 +137,39 @@ public class JobOfferService : IJobOfferService
         int id,
         UpdateJobOfferRequestDto request)
     {
-        var offer =
-            await _jobOfferRepository
-                .GetByIdAsync(id);
+        if (!Enum.IsDefined(typeof(OfferType), request.OfferType))
+        {
+            throw new InvalidOfferTypeException(request.OfferType);
+        }
 
-        if (offer is null)
-            throw new NotFoundException("Job offer not found.");
+        if (request.Salary <= 0)
+        {
+            throw new InvalidSalaryException(request.Salary);
+        }
+
+        if (request.ClosingDate <= DateTime.UtcNow)
+        {
+            throw new InvalidClosingDateException(request.ClosingDate);
+        }
+
+        if (string.IsNullOrWhiteSpace(request.JobTitle))
+        {
+            throw new FieldRequiredException("JobTitle");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Description))
+        {
+            throw new FieldRequiredException("Description");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Location))
+        {
+            throw new FieldRequiredException("Location");
+        }
+
+        var offer =
+            await GetJobOfferOrThrowAsync(id);
+
 
         offer.Update(
             request.JobTitle,
@@ -160,11 +185,7 @@ public class JobOfferService : IJobOfferService
     public async Task DeleteAsync(int id)
     {
         var offer =
-            await _jobOfferRepository
-                .GetByIdAsync(id);
-
-        if (offer is null)
-            throw new NotFoundException("Job offer not found.");
+            await GetJobOfferOrThrowAsync(id);
 
         await _jobOfferRepository.DeleteAsync(offer);
     }
@@ -172,11 +193,7 @@ public class JobOfferService : IJobOfferService
     public async Task CloseAsync(int id)
     {
         var offer =
-            await _jobOfferRepository
-                .GetByIdAsync(id);
-
-        if (offer is null)
-            throw new NotFoundException("Job offer not found.");
+            await GetJobOfferOrThrowAsync(id);
 
         offer.Close();
 
@@ -186,11 +203,7 @@ public class JobOfferService : IJobOfferService
     public async Task PauseAsync(int id)
     {
         var offer =
-            await _jobOfferRepository
-                .GetByIdAsync(id);
-
-        if (offer is null)
-            throw new NotFoundException("Job offer not found.");
+            await GetJobOfferOrThrowAsync(id);
 
         offer.Pause();
 
@@ -200,15 +213,56 @@ public class JobOfferService : IJobOfferService
     public async Task ReopenAsync(int id)
     {
         var offer =
-            await _jobOfferRepository
-                .GetByIdAsync(id);
-
-        if (offer is null)
-            throw new NotFoundException("Job offer not found.");
+            await GetJobOfferOrThrowAsync(id);
 
         offer.Reopen();
 
         await _jobOfferRepository.UpdateAsync(offer);
+    }
+
+    private async Task<JobOffer> GetJobOfferOrThrowAsync(
+        int id)
+    {
+        var offer =
+            await _jobOfferRepository
+                .GetByIdAsync(id);
+
+        if (offer is null)
+            throw new NotFoundException(
+                nameof(JobOffer),
+                id);
+
+        return offer;
+    }
+
+    private async Task<Company> GetCompanyOrThrowAsync(
+        int id)
+    {
+        var company =
+            await _companyRepository
+                .GetByIdAsync(id);
+
+        if (company is null)
+            throw new NotFoundException(
+                nameof(Company),
+                id);
+
+        return company;
+    }
+
+    private async Task<User> GetRecruiterOrThrowAsync(
+        int id)
+    {
+        var recruiter =
+            await _userRepository
+                .GetByIdAsync(id);
+
+        if (recruiter is null)
+            throw new NotFoundException(
+                "Recruiter",
+                id);
+
+        return recruiter;
     }
 
     private static JobOfferResponseDto MapToResponse(
@@ -226,8 +280,7 @@ public class JobOfferService : IJobOfferService
             PublicationDate = offer.PublicationDate,
             ClosingDate = offer.ClosingDate,
             CompanyId = offer.CompanyId,
-            CreatedByRecruiterId =
-                offer.CreatedByRecruiterId
+            CreatedByRecruiterId = offer.CreatedByRecruiterId
         };
     }
 }

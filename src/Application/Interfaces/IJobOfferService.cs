@@ -10,7 +10,7 @@ public interface IJobOfferService
 
     Task<List<JobOfferResponseDto>> GetAllAsync();
 
-    Task<JobOfferResponseDto?> GetByIdAsync(int id);
+    Task<JobOfferResponseDto> GetByIdAsync(int id);
 
     Task<List<JobOfferResponseDto>> GetByCompanyIdAsync(int companyId);
 
