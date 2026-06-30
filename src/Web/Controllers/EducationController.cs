@@ -46,11 +46,11 @@ namespace Web.Controllers
             return Ok(educations);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Candidate")]
         [HttpPost]
-        public IActionResult Create([FromBody] CreateEducationRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateEducationRequest request)
         {
-            var result = _educationService.CreateEducation(request);
+            var result = await _educationService.CreateEducationAsync(request);
 
             return CreatedAtAction(
                 nameof(GetById),

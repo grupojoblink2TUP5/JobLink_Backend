@@ -11,7 +11,7 @@ public interface IExperienceService
 
     List<ExperienceResponse> GetExperiencesByUserId(int userId);
 
-    ExperienceResponse CreateExperience(CreateExperienceRequest request);
+    Task<ExperienceResponse> CreateExperienceAsync(CreateExperienceRequest request);
 
     ExperienceResponse UpdateExperience(int id, UpdateExperienceRequest request);
 

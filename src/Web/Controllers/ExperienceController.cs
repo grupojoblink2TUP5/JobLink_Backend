@@ -46,11 +46,11 @@ namespace Web.Controllers
             return Ok(experiences);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Candidate")]
         [HttpPost]
-        public IActionResult Create([FromBody] CreateExperienceRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateExperienceRequest request)
         {
-            var result = _experienceService.CreateExperience(request);
+            var result = await _experienceService.CreateExperienceAsync(request);
 
             return CreatedAtAction(
                 nameof(GetById),

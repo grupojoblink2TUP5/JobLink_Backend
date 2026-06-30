@@ -2,6 +2,7 @@ using Application.DTOs.Education.Request;
 using Application.DTOs.Education.Response;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
 
@@ -10,10 +11,14 @@ namespace Application.Services;
 public class EducationService : IEducationService
 {
     private readonly IEducationRepository _repository;
+    private readonly IUserRepository _userRepository;
 
-    public EducationService(IEducationRepository repository)
+    public EducationService(
+        IEducationRepository repository,
+        IUserRepository userRepository)
     {
         _repository = repository;
+        _userRepository = userRepository;
     }
 
     public List<EducationResponse> GetAllEducations()
@@ -65,8 +70,23 @@ public class EducationService : IEducationService
             .ToList();
     }
 
-    public EducationResponse CreateEducation(CreateEducationRequest request)
+    public async Task<EducationResponse> CreateEducationAsync(
+        CreateEducationRequest request)
     {
+        ValidateDates(request.StartDate, request.EndDate);
+
+        var user = await _userRepository.GetByIdAsync(request.UserId);
+
+        if (user == null)
+        {
+            throw new NotFoundException($"User not found for id = {request.UserId}");
+        }
+
+        if (user.Role != UserRole.Candidate)
+        {
+            throw new UserIsNotCandidateException(user.Email);
+        }
+
         var education = new Education(
             request.InstitutionName,
             request.Degree,
@@ -90,6 +110,8 @@ public class EducationService : IEducationService
 
     public EducationResponse UpdateEducation(int id, UpdateEducationRequest request)
     {
+        ValidateDates(request.StartDate, request.EndDate);
+
         var education = _repository.GetById(id);
 
         if (education == null)
@@ -130,5 +152,13 @@ public class EducationService : IEducationService
         _repository.SaveChanges();
 
         return true;
+    }
+
+    private static void ValidateDates(DateTime startDate, DateTime? endDate)
+    {
+        if (endDate.HasValue && endDate.Value <= startDate)
+        {
+            throw new InvalidEducationDateException();
+        }
     }
 }
