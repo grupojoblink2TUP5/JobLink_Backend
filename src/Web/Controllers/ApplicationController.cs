@@ -69,7 +69,7 @@ namespace Web.Controllers
             return Ok(application);
         }
 
-        [Authorize(Roles = "Recruiter,Admin")]
+        [Authorize(Roles = "Recruiter,Admin, Candidate")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateApplicationRequest request)
         {
