@@ -300,6 +300,19 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "admin@gmail.com",
+                            FirstName = "TestingStudentLastname",
+                            LastName = "TestingStudentLastname",
+                            Password = "123456",
+                            RegistrationDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Role = 0,
+                            Status = true
+                        });
                 });
 #pragma warning restore 612, 618
         }
