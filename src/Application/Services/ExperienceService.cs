@@ -76,8 +76,6 @@ public class ExperienceService : IExperienceService
     public async Task<ExperienceResponse> CreateExperienceAsync(
         CreateExperienceRequest request)
     {
-        ValidateDates(request.StartDate, request.EndDate);
-
         var user = await _userRepository.GetByIdAsync(request.UserId);
 
         if (user == null)
@@ -89,6 +87,8 @@ public class ExperienceService : IExperienceService
         {
             throw new UserIsNotCandidateException(user.Email);
         }
+
+        ValidateDates(request.StartDate, request.EndDate);
 
         var experience = new Experience(
             request.CompanyName,
@@ -113,16 +113,16 @@ public class ExperienceService : IExperienceService
         );
     }
 
-    public ExperienceResponse UpdateExperience(int id, UpdateExperienceRequest request)
+    public void UpdateExperience(int id, UpdateExperienceRequest request)
     {
-        ValidateDates(request.StartDate, request.EndDate);
-
         var experience = _repository.GetById(id);
 
         if (experience == null)
         {
             throw new NotFoundException($"Experience not found for id = {id}");
         }
+
+        ValidateDates(request.StartDate, request.EndDate);
 
         experience.UpdateExperience(
             request.CompanyName,
@@ -134,31 +134,19 @@ public class ExperienceService : IExperienceService
 
         _repository.Update(experience);
         _repository.SaveChanges();
-
-        return new ExperienceResponse(
-            experience.Id,
-            experience.CompanyName,
-            experience.Position,
-            experience.StartDate,
-            experience.EndDate,
-            experience.Description,
-            experience.UserId
-        );
     }
 
-    public bool DeleteExperience(int id)
+    public void DeleteExperience(int id)
     {
         var experience = _repository.GetById(id);
 
         if (experience == null)
         {
-            return false;
+            throw new NotFoundException($"Experience not found for id = {id}");
         }
 
         _repository.Delete(experience);
         _repository.SaveChanges();
-
-        return true;
     }
 
     private static void ValidateDates(DateTime startDate, DateTime? endDate)

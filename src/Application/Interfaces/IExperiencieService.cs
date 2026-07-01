@@ -13,7 +13,7 @@ public interface IExperienceService
 
     Task<ExperienceResponse> CreateExperienceAsync(CreateExperienceRequest request);
 
-    ExperienceResponse UpdateExperience(int id, UpdateExperienceRequest request);
+    void UpdateExperience(int id, UpdateExperienceRequest request);
 
-    bool DeleteExperience(int id);
+    void DeleteExperience(int id);
 }

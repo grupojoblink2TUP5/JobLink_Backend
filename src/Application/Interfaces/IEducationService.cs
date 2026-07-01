@@ -13,7 +13,7 @@ public interface IEducationService
 
     Task<EducationResponse> CreateEducationAsync(CreateEducationRequest request);
 
-    EducationResponse UpdateEducation(int id, UpdateEducationRequest request);
+    void UpdateEducation(int id, UpdateEducationRequest request);
 
-    bool DeleteEducation(int id);
+    void DeleteEducation(int id);
 }
