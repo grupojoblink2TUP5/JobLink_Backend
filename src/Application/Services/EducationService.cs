@@ -77,7 +77,7 @@ public class EducationService : IEducationService
 
         if (user == null)
         {
-            throw new NotFoundException($"User not found for id = {request.UserId}");
+            throw new NotFoundException("User", request.UserId);
         }
 
         if (user.Role != UserRole.Candidate)
@@ -114,7 +114,7 @@ public class EducationService : IEducationService
 
         if (education == null)
         {
-            throw new NotFoundException($"Education", id);
+            throw new NotFoundException("Education", id);
         }
 
         ValidateDates(request.StartDate, request.EndDate);
@@ -136,7 +136,7 @@ public class EducationService : IEducationService
 
         if (education == null)
         {
-            throw new NotFoundException($"Education not found for id = {id}");
+            throw new NotFoundException("Education", id);
         }
 
         _repository.Delete(education);

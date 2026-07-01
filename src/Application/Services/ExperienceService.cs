@@ -80,7 +80,7 @@ public class ExperienceService : IExperienceService
 
         if (user == null)
         {
-            throw new NotFoundException($"User not found for id = {request.UserId}");
+            throw new NotFoundException("User", request.UserId);
         }
 
         if (user.Role != UserRole.Candidate)
@@ -142,7 +142,7 @@ public class ExperienceService : IExperienceService
 
         if (experience == null)
         {
-            throw new NotFoundException($"Experience not found for id = {id}");
+            throw new NotFoundException("Experience", id);
         }
 
         _repository.Delete(experience);
