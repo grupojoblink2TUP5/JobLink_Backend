@@ -17,7 +17,7 @@ namespace Web.Controllers
             _companyService = companyService;
         }
 
-        [Authorize(Roles = "Recruiter,Admin")]
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,14 +26,13 @@ namespace Web.Controllers
                     .GetAllAsync());
         }
 
-        [Authorize(Roles = "Recruiter,Admin")]
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(
-        int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            return Ok(
-                await _companyService
-                    .GetByIdAsync(id));
+            var company = await _companyService.GetByIdAsync(id);
+
+            return Ok(company);
         }
 
 
@@ -60,6 +59,7 @@ namespace Web.Controllers
         }
 
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpPost("{id:int}/logo")]
         public async Task<IActionResult> UploadLogo(
         int id,
@@ -77,37 +77,6 @@ namespace Web.Controllers
             return NoContent();
         }
 
-        // [Authorize(Roles = "Admin")]
-        // [HttpPatch("{id:int}/approve")]
-        // public IActionResult Approve([FromRoute] int id)
-        // {
-        //     try
-        //     {
-        //         var approvedCompany = _companyService.ApproveCompany(id);
-
-        //         return Ok(approvedCompany);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return NotFound(ex.Message);
-        //     }
-        // }
-
-        // [Authorize(Roles = "Admin")]
-        // [HttpPatch("{id:int}/reject")]
-        // public IActionResult Reject([FromRoute] int id)
-        // {
-        //     try
-        //     {
-        //         var rejectedCompany = _companyService.RejectCompany(id);
-
-        //         return Ok(rejectedCompany);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return NotFound(ex.Message);
-        //     }
-        // }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]

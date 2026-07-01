@@ -17,4 +17,6 @@ public interface IUserRepository
     Task DeleteAsync(User user);
 
     Task SaveChangesAsync();
+
+    Task<int> CountAdminsAsync();
 }

@@ -1,9 +1,11 @@
+using System.Net.Mail;
 using Application.DTOs.User.Request;
 using Application.DTOs.User.Response;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Exceptions;
 using Domain.Interfaces;
+using Domain.Enums;
 
 namespace Application.Services;
 
@@ -18,7 +20,8 @@ public class UserService : IUserService
 
     public async Task<List<UserResponse>> GetAllUsersAsync()
     {
-        var users = await _repository.GetAllAsync();
+        var users =
+            await _repository.GetAllAsync();
 
         return users
             .Select(MapToResponse)
@@ -27,11 +30,8 @@ public class UserService : IUserService
 
     public async Task<UserResponse> GetUserByIdAsync(int id)
     {
-        var user = await _repository.GetByIdAsync(id);
-
-        if (user is null)
-            throw new NotFoundException(
-                $"User not found for id = {id}");
+        var user =
+            await GetUserOrThrowAsync(id);
 
         return MapToResponse(user);
     }
@@ -39,12 +39,24 @@ public class UserService : IUserService
     public async Task<UserResponse> CreateUserAsync(
         CreateUserRequest request)
     {
+        ValidateUser(request);
+
+        var existingUser =
+            await _repository.GetByEmailAsync(
+                request.Email!);
+
+        if (existingUser is not null)
+        {
+            throw new UserAlreadyExistsException(
+                request.Email!);
+        }
+
         var user = new User(
-            request.FirstName!,
-            request.LastName!,
-            request.Email!,
-            request.Password!,
-            request.Role!);
+        request.FirstName!,
+        request.LastName!,
+        request.Email!,
+        request.Password!,
+        UserRole.Candidate);
 
         await _repository.AddAsync(user);
 
@@ -57,11 +69,21 @@ public class UserService : IUserService
         int id,
         UpdateUserRequest request)
     {
-        var user = await _repository.GetByIdAsync(id);
+        var user =
+            await GetUserOrThrowAsync(id);
 
-        if (user is null)
-            throw new NotFoundException(
-                $"User not found for id = {id}");
+        ValidateUser(request);
+
+        var existingUser =
+            await _repository.GetByEmailAsync(
+                request.Email!);
+
+        if (existingUser is not null &&
+            existingUser.Id != user.Id)
+        {
+            throw new UserAlreadyExistsException(
+                request.Email!);
+        }
 
         user.Update(
             request.FirstName,
@@ -76,13 +98,29 @@ public class UserService : IUserService
         return MapToResponse(user);
     }
 
+    public async Task<UserResponse> ActivateAsync(int id)
+    {
+        var user =
+            await GetUserOrThrowAsync(id);
+
+        user.Activate();
+
+        await _repository.UpdateAsync(user);
+
+        await _repository.SaveChangesAsync();
+
+        return MapToResponse(user);
+    }
+
     public async Task<UserResponse> DeactivateAsync(int id)
     {
-        var user = await _repository.GetByIdAsync(id);
+        var user =
+            await GetUserOrThrowAsync(id);
 
-        if (user is null)
-            throw new NotFoundException(
-                $"User not found for id = {id}");
+        if (user.Role == UserRole.Admin)
+        {
+            throw new AdminCannotBeDeactivatedException();
+        }
 
         user.Deactivate();
 
@@ -93,21 +131,79 @@ public class UserService : IUserService
         return MapToResponse(user);
     }
 
-    public async Task<UserResponse> ActivateAsync(int id)
+    private async Task<User> GetUserOrThrowAsync(int id)
     {
-        var user = await _repository.GetByIdAsync(id);
+        var user =
+            await _repository.GetByIdAsync(id);
 
         if (user is null)
+        {
             throw new NotFoundException(
-                $"User not found for id = {id}");
+                nameof(User),
+                id);
+        }
 
-        user.Activate();
+        return user;
+    }
 
-        await _repository.UpdateAsync(user);
+    private static void ValidateUser(
+        CreateUserRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FirstName))
+            throw new FieldRequiredException(
+                nameof(request.FirstName));
 
-        await _repository.SaveChangesAsync();
+        if (string.IsNullOrWhiteSpace(request.LastName))
+            throw new FieldRequiredException(
+                nameof(request.LastName));
 
-        return MapToResponse(user);
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new FieldRequiredException(
+                nameof(request.Email));
+
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new FieldRequiredException(
+                nameof(request.Password));
+
+        try
+        {
+            _ = new MailAddress(request.Email);
+        }
+        catch
+        {
+            throw new InvalidEmailException(
+                request.Email);
+        }
+    }
+
+    private static void ValidateUser(
+        UpdateUserRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FirstName))
+            throw new FieldRequiredException(
+                nameof(request.FirstName));
+
+        if (string.IsNullOrWhiteSpace(request.LastName))
+            throw new FieldRequiredException(
+                nameof(request.LastName));
+
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new FieldRequiredException(
+                nameof(request.Email));
+
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new FieldRequiredException(
+                nameof(request.Password));
+
+        try
+        {
+            _ = new MailAddress(request.Email);
+        }
+        catch
+        {
+            throw new InvalidEmailException(
+                request.Email);
+        }
     }
 
     private static UserResponse MapToResponse(User user)
@@ -119,7 +215,38 @@ public class UserService : IUserService
             user.Email,
             user.RegistrationDate,
             user.Status,
-            user.Role
-        );
+            user.Role);
+    }
+
+    public async Task<UserResponse> UpdateRoleAsync(
+    int id,
+    UpdateUserRoleRequest request)
+    {
+        var user =
+            await GetUserOrThrowAsync(id);
+
+        user.ChangeRole(request.Role);
+        if (!Enum.IsDefined(typeof(UserRole), request.Role))
+        {
+            throw new InvalidUserRoleException(request.Role);
+        }
+
+        if (user.Role == UserRole.Admin &&
+            request.Role != UserRole.Admin)
+        {
+            var adminCount =
+                await _repository.CountAdminsAsync();
+
+            if (adminCount == 1)
+            {
+                throw new Exception("Cannot remove the last admin user.");
+            }
+        }
+
+        await _repository.UpdateAsync(user);
+
+        await _repository.SaveChangesAsync();
+
+        return MapToResponse(user);
     }
 }
