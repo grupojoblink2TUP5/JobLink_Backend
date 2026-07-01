@@ -1,19 +1,23 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 using System.Net;
+using System.Text.Json;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Web.Middlewares;
 
 public class GlobalExceptionHandlingMiddleware : IMiddleware
 {
     private readonly ILogger<GlobalExceptionHandlingMiddleware> _logger;
+
     public GlobalExceptionHandlingMiddleware(
         ILogger<GlobalExceptionHandlingMiddleware> logger)
     {
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+    public async Task InvokeAsync(
+        HttpContext context,
+        RequestDelegate next)
     {
         try
         {
@@ -21,92 +25,81 @@ public class GlobalExceptionHandlingMiddleware : IMiddleware
         }
         catch (NotFoundException ex)
         {
-            _logger.LogError(ex, ex.Message);
-            int statusCode = (int)HttpStatusCode.NotFound;
-            context.Response.StatusCode = statusCode;
-            ProblemDetails problem = new()
-            {
-                Status = statusCode,
-                Type = "Server error",
-                Title = "Server error",
-                Detail = ex.Message
-            };
-            string json = JsonSerializer.Serialize(problem);
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(json);
+            _logger.LogWarning(ex, ex.Message);
+
+            await WriteProblemDetails(
+                context,
+                HttpStatusCode.NotFound,
+                "Resource not found",
+                "The requested resource could not be found.",
+                ex.Message);
         }
         catch (InvalidCredentialsException ex)
         {
-            _logger.LogError(ex, ex.Message);
+            _logger.LogWarning(ex, ex.Message);
 
-            int statusCode = (int)HttpStatusCode.Unauthorized;
-
-            context.Response.StatusCode = statusCode;
-
-            ProblemDetails problem = new()
-            {
-                Status = statusCode,
-                Type = "Authentication error",
-                Title = "Authentication error",
-                Detail = ex.Message
-            };
-
-            string json = JsonSerializer.Serialize(problem);
-
-            context.Response.ContentType = "application/json";
-
-            await context.Response.WriteAsync(json);
+            await WriteProblemDetails(
+                context,
+                HttpStatusCode.Unauthorized,
+                "Unauthorized",
+                "Authentication failed.",
+                ex.Message);
         }
-        /*  catch (AppValidationException ex)
-          {
-              _logger.LogError(ex, ex.Message);
-              int statusCode = (int)HttpStatusCode.BadRequest;
-              context.Response.StatusCode = statusCode;
-              ProblemDetails problem = new()
-              {
-                  Status = statusCode,
-                  Type = "Server error",
-                  Title = "Server error",
-                  Detail = ex.Message
-              };
-              string json = JsonSerializer.Serialize(problem);
-              context.Response.ContentType = "application/json";
-              await context.Response.WriteAsync(json);
-          } */
+        catch (DomainException ex)
+        {
+            _logger.LogWarning(ex, ex.Message);
+
+            await WriteProblemDetails(
+                context,
+                HttpStatusCode.BadRequest,
+                "Business rule violation",
+                "A business rule has been violated.",
+                ex.Message);
+        }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, ex.Message);
-            int statusCode = (int)HttpStatusCode.BadRequest;
-            context.Response.StatusCode = statusCode;
-            ProblemDetails problem = new()
-            {
-                Status = statusCode,
-                Type = "Server error",
-                Title = "Server error",
-                Detail = "An internal server"
-            };
-            string json = JsonSerializer.Serialize(problem);
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(json);
+            _logger.LogWarning(ex, ex.Message);
+
+            await WriteProblemDetails(
+                context,
+                HttpStatusCode.BadRequest,
+                "Invalid request",
+                "The request contains invalid data.",
+                ex.Message);
         }
         catch (Exception ex)
         {
-            var innerMessage = ex.InnerException?.Message ?? "Sin inner exception";
-            var innerInnerMessage = ex.InnerException?.InnerException?.Message ?? "";
-
             _logger.LogError(ex, ex.Message);
-            int statusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.StatusCode = statusCode;
-            ProblemDetails problem = new()
-            {
-                Status = statusCode,
-                Type = "Server error",
-                Title = "Server error",
-                Detail = ex.Message
-            };
-            string json = JsonSerializer.Serialize(problem);
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(json);
+
+            await WriteProblemDetails(
+                context,
+                HttpStatusCode.InternalServerError,
+                "Internal server error",
+                "An unexpected error occurred.",
+                "Please contact the system administrator.");
         }
+    }
+
+    private static async Task WriteProblemDetails(
+        HttpContext context,
+        HttpStatusCode statusCode,
+        string title,
+        string type,
+        string detail)
+    {
+        context.Response.StatusCode = (int)statusCode;
+        context.Response.ContentType = "application/json";
+
+        var problem = new ProblemDetails
+        {
+            Status = (int)statusCode,
+            Title = title,
+            Type = type,
+            Detail = detail
+        };
+
+        var json = JsonSerializer.Serialize(problem);
+
+        await context.Response.WriteAsync(json);
     }
 }

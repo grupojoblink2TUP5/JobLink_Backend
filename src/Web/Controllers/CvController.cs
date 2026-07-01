@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
-using Application.DTOs.Cv.Request;
 using Microsoft.AspNetCore.Authorization;
-using Domain.Exceptions;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/cv")]
@@ -10,67 +9,59 @@ public class CvController : ControllerBase
 {
     private readonly ICvService _cvService;
 
-    public CvController(
-        ICvService cvService)
+    public CvController(ICvService cvService)
     {
         _cvService = cvService;
     }
 
+    [Authorize]
     [HttpPost]
-    public async Task<IActionResult> UploadCv(
-        [FromForm] int userId,
-        IFormFile file)
+    public async Task<IActionResult> UploadCv(IFormFile file)
     {
-        if (file == null)
-            return BadRequest();
+        var userIdClaim = User.FindFirstValue("sub")
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        var allowedExtensions =
-            new[] { ".pdf", ".doc", ".docx" };
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
 
-        var extension =
-            Path.GetExtension(file.FileName)
-                .ToLower();
+        if (file is null)
+            return BadRequest(new { message = "El archivo es requerido." });
+
+        var allowedExtensions = new[] { ".pdf", ".doc", ".docx" };
+        var extension = Path.GetExtension(file.FileName).ToLower();
 
         if (!allowedExtensions.Contains(extension))
-        {
-            return BadRequest(
-                "Solo PDF o Word");
-        }
+            return BadRequest(new { message = "Solo se permiten archivos PDF o Word." });
 
-        using var stream =
-            file.OpenReadStream();
+        using var stream = file.OpenReadStream();
 
-        var result =
-            await _cvService
-                .UploadCvAsync(
-                    userId,
-                    stream,
-                    file.FileName);
+        var result = await _cvService.UploadCvAsync(userId, stream, file.FileName);
 
         return Ok(result);
     }
 
     [HttpGet("{userId:int}")]
-    public async Task<IActionResult> GetCv(
-        int userId)
+    public async Task<IActionResult> GetCv([FromRoute] int userId)
     {
-        var cv =
-            await _cvService
-                .GetByUserIdAsync(userId);
+        var cv = await _cvService.GetByUserIdAsync(userId);
 
         if (cv is null)
-            return NotFound();
+            return NotFound(new { message = $"CV not found for user. Id = {userId}" });
 
         return Ok(cv);
     }
 
-    [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteCv(
-        int userId)
+    [Authorize]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteCv()
     {
-        await _cvService
-            .DeleteCvAsync(userId);
+        var userIdClaim = User.FindFirstValue("sub")
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        await _cvService.DeleteCvAsync(userId);
         return NoContent();
     }
 }
