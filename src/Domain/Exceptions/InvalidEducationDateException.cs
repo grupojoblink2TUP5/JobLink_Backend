@@ -1,6 +1,6 @@
 namespace Domain.Exceptions;
 
-public class InvalidEducationDateException : Exception
+public class InvalidEducationDateException : DomainException
 {
     public InvalidEducationDateException()
         : base("End date must be greater than start date.")
