@@ -10,8 +10,7 @@ public interface ICompanyService
 
     Task<List<CompanyResponseDto>> GetAllAsync();
 
-    Task<CompanyResponseDto?> GetByIdAsync(
-        int id);
+    Task<CompanyResponseDto> GetByIdAsync(int id);
 
     Task UpdateAsync(
         int id,

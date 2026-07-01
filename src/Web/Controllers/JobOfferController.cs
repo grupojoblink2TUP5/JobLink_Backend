@@ -1,5 +1,6 @@
 using Application.DTOs.JobOffer.Request;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
@@ -16,6 +17,7 @@ public class JobOfferController : ControllerBase
         _jobOfferService = jobOfferService;
     }
 
+    [Authorize(Roles = "Recruiter,Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateJobOfferRequestDto request)
@@ -29,6 +31,7 @@ public class JobOfferController : ControllerBase
             jobOffer);
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -38,6 +41,7 @@ public class JobOfferController : ControllerBase
         return Ok(offers);
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -50,6 +54,7 @@ public class JobOfferController : ControllerBase
         return Ok(offer);
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpGet("company/{companyId:int}")]
     public async Task<IActionResult> GetByCompany(
         int companyId)
@@ -61,6 +66,7 @@ public class JobOfferController : ControllerBase
         return Ok(offers);
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpGet("open")]
     public async Task<IActionResult> GetOpenOffers()
     {
@@ -71,6 +77,7 @@ public class JobOfferController : ControllerBase
         return Ok(offers);
     }
 
+    [Authorize(Roles = "Recruiter,Admin")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
@@ -83,6 +90,7 @@ public class JobOfferController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Recruiter,Admin")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -91,6 +99,8 @@ public class JobOfferController : ControllerBase
         return NoContent();
     }
 
+
+    [Authorize(Roles = "Recruiter,Admin")]
     [HttpPatch("{id:int}/close")]
     public async Task<IActionResult> Close(int id)
     {
@@ -99,6 +109,7 @@ public class JobOfferController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Recruiter,Admin")]
     [HttpPatch("{id:int}/pause")]
     public async Task<IActionResult> Pause(int id)
     {
@@ -107,6 +118,7 @@ public class JobOfferController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Recruiter,Admin")]
     [HttpPatch("{id:int}/reopen")]
     public async Task<IActionResult> Reopen(int id)
     {

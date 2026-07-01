@@ -1,5 +1,6 @@
 using Application.DTOs.User.Request;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
@@ -17,6 +18,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
     {
         var users =
@@ -25,6 +27,7 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
+    [Authorize(Roles = "Admin,Recruiter,Candidate")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -47,6 +50,7 @@ public class UserController : ControllerBase
             user);
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
@@ -60,6 +64,7 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:int}/activate")]
     public async Task<IActionResult> Activate(int id)
     {
@@ -69,11 +74,26 @@ public class UserController : ControllerBase
         return Ok(user);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:int}/deactivate")]
     public async Task<IActionResult> Deactivate(int id)
     {
         var user =
             await _userService.DeactivateAsync(id);
+
+        return Ok(user);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("{id:int}/role")]
+    public async Task<IActionResult> UpdateRole(
+    int id,
+    UpdateUserRoleRequest request)
+    {
+        var user =
+            await _userService.UpdateRoleAsync(
+                id,
+                request);
 
         return Ok(user);
     }
