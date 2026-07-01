@@ -58,6 +58,12 @@ public class JobOfferService : IJobOfferService
             throw new UserIsNotRecruiterException(
                 recruiter.Email);
 
+        if (!recruiter.Status)
+        {
+            throw new UserInactiveException(
+                recruiter.Email);
+        }
+
         if (company.CreatedByRecruiterId != recruiter.Id)
             throw new RecruiterDoesNotOwnCompanyException();
 

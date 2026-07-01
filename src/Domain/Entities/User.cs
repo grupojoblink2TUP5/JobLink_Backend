@@ -67,4 +67,9 @@ public class User
     {
         Status = false;
     }
+
+    public void ChangeRole(UserRole role)
+    {
+        Role = role;
+    }
 }

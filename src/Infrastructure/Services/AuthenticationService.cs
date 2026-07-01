@@ -13,7 +13,6 @@ namespace Infrastructure.Services;
 public class AuthenticationService : ICustomAuthenticationService
 {
     private readonly IUserRepository _repository;
-
     private readonly IConfiguration _configuration;
 
     public AuthenticationService(
@@ -36,13 +35,20 @@ public class AuthenticationService : ICustomAuthenticationService
             throw new InvalidCredentialsException();
         }
 
-        var securityKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(
-                _configuration["Authentication:SecretForKey"]!));
+        if (!user.Status)
+        {
+            throw new UserInactiveException(user.Email);
+        }
 
-        var credentials = new SigningCredentials(
-            securityKey,
-            SecurityAlgorithms.HmacSha256);
+        var securityKey =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _configuration["Authentication:SecretForKey"]!));
+
+        var credentials =
+            new SigningCredentials(
+                securityKey,
+                SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
         {

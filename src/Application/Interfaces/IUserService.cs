@@ -11,11 +11,11 @@ public interface IUserService
 
     Task<UserResponse> CreateUserAsync(CreateUserRequest request);
 
-    Task<UserResponse> UpdateUserAsync(
-        int id,
-        UpdateUserRequest request);
+    Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest request);
 
     Task<UserResponse> ActivateAsync(int id);
 
     Task<UserResponse> DeactivateAsync(int id);
+
+    Task<UserResponse> UpdateRoleAsync(int id, UpdateUserRoleRequest request);
 }
