@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs.Experience.Request;
 using Microsoft.AspNetCore.Authorization;
-using Domain.Exceptions;
 
 namespace Web.Controllers
 {
@@ -46,11 +45,11 @@ namespace Web.Controllers
             return Ok(experiences);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Candidate")]
         [HttpPost]
-        public IActionResult Create([FromBody] CreateExperienceRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateExperienceRequest request)
         {
-            var result = _experienceService.CreateExperience(request);
+            var result = await _experienceService.CreateExperienceAsync(request);
 
             return CreatedAtAction(
                 nameof(GetById),
@@ -65,27 +64,15 @@ namespace Web.Controllers
             [FromBody] UpdateExperienceRequest request
         )
         {
-            try
-            {
-                var result = _experienceService.UpdateExperience(id, request);
+            _experienceService.UpdateExperience(id, request);
 
-                return Ok(result);
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var success = _experienceService.DeleteExperience(id);
-
-            if (!success)
-            {
-                return NotFound();
-            }
+            _experienceService.DeleteExperience(id);
 
             return NoContent();
         }

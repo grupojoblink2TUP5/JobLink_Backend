@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs.Education.Request;
 using Microsoft.AspNetCore.Authorization;
-using Domain.Exceptions;
 
 namespace Web.Controllers
 {
@@ -46,11 +45,11 @@ namespace Web.Controllers
             return Ok(educations);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Candidate")]
         [HttpPost]
-        public IActionResult Create([FromBody] CreateEducationRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateEducationRequest request)
         {
-            var result = _educationService.CreateEducation(request);
+            var result = await _educationService.CreateEducationAsync(request);
 
             return CreatedAtAction(
                 nameof(GetById),
@@ -65,27 +64,15 @@ namespace Web.Controllers
             [FromBody] UpdateEducationRequest request
         )
         {
-            try
-            {
-                var result = _educationService.UpdateEducation(id, request);
+            _educationService.UpdateEducation(id, request);
 
-                return Ok(result);
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var success = _educationService.DeleteEducation(id);
-
-            if (!success)
-            {
-                return NotFound();
-            }
+            _educationService.DeleteEducation(id);
 
             return NoContent();
         }

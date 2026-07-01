@@ -2,6 +2,7 @@ using Application.DTOs.Experience.Request;
 using Application.DTOs.Experience.Response;
 using Application.Interfaces;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.Interfaces;
 
@@ -10,10 +11,14 @@ namespace Application.Services;
 public class ExperienceService : IExperienceService
 {
     private readonly IExperienceRepository _repository;
+    private readonly IUserRepository _userRepository;
 
-    public ExperienceService(IExperienceRepository repository)
+    public ExperienceService(
+        IExperienceRepository repository,
+        IUserRepository userRepository)
     {
         _repository = repository;
+        _userRepository = userRepository;
     }
 
     public List<ExperienceResponse> GetAllExperiences()
@@ -68,8 +73,23 @@ public class ExperienceService : IExperienceService
             .ToList();
     }
 
-    public ExperienceResponse CreateExperience(CreateExperienceRequest request)
+    public async Task<ExperienceResponse> CreateExperienceAsync(
+        CreateExperienceRequest request)
     {
+        var user = await _userRepository.GetByIdAsync(request.UserId);
+
+        if (user == null)
+        {
+            throw new NotFoundException($"User not found for id = {request.UserId}");
+        }
+
+        if (user.Role != UserRole.Candidate)
+        {
+            throw new UserIsNotCandidateException(user.Email);
+        }
+
+        ValidateDates(request.StartDate, request.EndDate);
+
         var experience = new Experience(
             request.CompanyName,
             request.Position,
@@ -93,7 +113,7 @@ public class ExperienceService : IExperienceService
         );
     }
 
-    public ExperienceResponse UpdateExperience(int id, UpdateExperienceRequest request)
+    public void UpdateExperience(int id, UpdateExperienceRequest request)
     {
         var experience = _repository.GetById(id);
 
@@ -101,6 +121,8 @@ public class ExperienceService : IExperienceService
         {
             throw new NotFoundException($"Experience not found for id = {id}");
         }
+
+        ValidateDates(request.StartDate, request.EndDate);
 
         experience.UpdateExperience(
             request.CompanyName,
@@ -112,30 +134,26 @@ public class ExperienceService : IExperienceService
 
         _repository.Update(experience);
         _repository.SaveChanges();
-
-        return new ExperienceResponse(
-            experience.Id,
-            experience.CompanyName,
-            experience.Position,
-            experience.StartDate,
-            experience.EndDate,
-            experience.Description,
-            experience.UserId
-        );
     }
 
-    public bool DeleteExperience(int id)
+    public void DeleteExperience(int id)
     {
         var experience = _repository.GetById(id);
 
         if (experience == null)
         {
-            return false;
+            throw new NotFoundException($"Experience not found for id = {id}");
         }
 
         _repository.Delete(experience);
         _repository.SaveChanges();
+    }
 
-        return true;
+    private static void ValidateDates(DateTime startDate, DateTime? endDate)
+    {
+        if (endDate.HasValue && endDate.Value <= startDate)
+        {
+            throw new InvalidExperienceDateException();
+        }
     }
 }
