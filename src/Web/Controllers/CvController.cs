@@ -14,7 +14,7 @@ public class CvController : ControllerBase
         _cvService = cvService;
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin,Candidate")]
     [HttpPost]
     public async Task<IActionResult> UploadCv(IFormFile file)
     {
@@ -40,6 +40,7 @@ public class CvController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin,Candidate")]
     [HttpGet("{userId:int}")]
     public async Task<IActionResult> GetCv([FromRoute] int userId)
     {
@@ -51,7 +52,7 @@ public class CvController : ControllerBase
         return Ok(cv);
     }
 
-    [Authorize]
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpDelete]
     public async Task<IActionResult> DeleteCv()
     {

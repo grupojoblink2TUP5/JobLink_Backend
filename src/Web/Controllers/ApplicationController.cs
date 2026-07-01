@@ -18,6 +18,7 @@ namespace Web.Controllers
             _applicationService = applicationService;
         }
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -25,6 +26,7 @@ namespace Web.Controllers
             return Ok(applications);
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
@@ -32,6 +34,7 @@ namespace Web.Controllers
             return Ok(application);
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("user/{userId:int}")]
         public async Task<IActionResult> GetByUserId([FromRoute] int userId)
         {
@@ -46,6 +49,7 @@ namespace Web.Controllers
             }
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("offer/{offerId:int}")]
         public async Task<IActionResult> GetByOfferId([FromRoute] int offerId)
         {
@@ -53,6 +57,7 @@ namespace Web.Controllers
             return Ok(applications);
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("user/{userId:int}/offer/{offerId:int}")]
         public async Task<IActionResult> GetByUserIdAndOfferId([FromRoute] int userId, [FromRoute] int offerId)
         {
@@ -64,7 +69,7 @@ namespace Web.Controllers
             return Ok(application);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateApplicationRequest request)
         {
@@ -78,7 +83,7 @@ namespace Web.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {

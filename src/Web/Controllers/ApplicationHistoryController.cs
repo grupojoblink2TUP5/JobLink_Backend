@@ -16,6 +16,7 @@ namespace Web.Controllers
             _applicationHistoryService = applicationHistoryService;
         }
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -23,6 +24,7 @@ namespace Web.Controllers
             return Ok(applicationHistories);
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {

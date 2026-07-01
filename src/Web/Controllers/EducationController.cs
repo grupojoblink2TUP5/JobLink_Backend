@@ -16,6 +16,7 @@ namespace Web.Controllers
             _educationService = educationService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -24,6 +25,7 @@ namespace Web.Controllers
             return Ok(educations);
         }
 
+        [Authorize(Roles = "Admin,Candidate")]
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
@@ -37,6 +39,7 @@ namespace Web.Controllers
             return Ok(education);
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("user/{userId:int}")]
         public IActionResult GetByUserId([FromRoute] int userId)
         {
@@ -45,7 +48,7 @@ namespace Web.Controllers
             return Ok(educations);
         }
 
-        [Authorize(Roles = "Candidate")]
+        [Authorize(Roles = "Candidate,Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateEducationRequest request)
         {
@@ -58,6 +61,7 @@ namespace Web.Controllers
             );
         }
 
+        [Authorize(Roles = "Admin,Candidate")]
         [HttpPut("{id:int}")]
         public IActionResult Update(
             [FromRoute] int id,
@@ -69,6 +73,7 @@ namespace Web.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin,Candidate")]
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
