@@ -94,7 +94,7 @@ public class EducationService : IEducationService
 
         if (education == null)
         {
-            throw new NotFoundException($"Education not found for id = {id}");
+            throw new NotFoundException($"Education", id);
         }
 
         education.UpdateEducation(

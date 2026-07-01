@@ -42,7 +42,7 @@ public class ApplicationService : IApplicationService
         var application = await _repository.GetByIdAsync(id);
 
         if (application is null)
-            throw new NotFoundException($"Application not found. Id = {id}");
+            throw new NotFoundException("Application", id);
 
         return MapToResponse(application);
     }
@@ -52,7 +52,7 @@ public class ApplicationService : IApplicationService
         var applications = await _repository.GetByUserIdAsync(userId);
 
         if (applications.Count == 0)
-            throw new NotFoundException($"No applications found for user id = {userId}");
+            throw new NotFoundException("Applications", userId);
 
         return applications
             .Select(MapToResponse)
@@ -86,7 +86,7 @@ public class ApplicationService : IApplicationService
         var user = await _userRepository.GetByIdAsync(userId);
 
         if (user is null)
-            throw new NotFoundException($"User not found. Id = {userId}");
+            throw new NotFoundException("User", userId);
 
         if (!user.Status)
             throw new InvalidOperationException("The user is not active.");
@@ -97,7 +97,7 @@ public class ApplicationService : IApplicationService
         var offer = await _jobOfferRepository.GetByIdAsync(request.OfferId);
 
         if (offer is null)
-            throw new NotFoundException($"JobOffer not found. Id = {request.OfferId}");
+            throw new NotFoundException("JobOffer", request.OfferId);
 
         if (offer.Status != JobOfferStatus.Open)
             throw new InvalidOperationException("Cannot apply to a job offer that is not open.");
@@ -133,7 +133,7 @@ public class ApplicationService : IApplicationService
         var application = await _repository.GetByIdAsync(id);
 
         if (application is null)
-            throw new NotFoundException($"Application not found. Id = {id}");
+            throw new NotFoundException("Application", id);
 
         _repository.Delete(application);
         await _repository.SaveChangesAsync();

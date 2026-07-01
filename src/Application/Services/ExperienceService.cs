@@ -99,7 +99,7 @@ public class ExperienceService : IExperienceService
 
         if (experience == null)
         {
-            throw new NotFoundException($"Experience not found for id = {id}");
+            throw new NotFoundException($"Experience", id);
         }
 
         experience.UpdateExperience(
