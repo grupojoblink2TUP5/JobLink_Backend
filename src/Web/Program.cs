@@ -94,6 +94,14 @@ builder.Services.AddScoped<ICustomAuthenticationService, AuthenticationService>(
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
+// APPLICATION
+builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+// APPLICATION HISTORY
+builder.Services.AddScoped<IApplicationHistoryRepository, ApplicationHistoryRepository>();
+builder.Services.AddScoped<IApplicationHistoryService, ApplicationHistoryService>();
+
 // JOB OFFER
 builder.Services.AddScoped<IJobOfferRepository, JobOfferRepository>();
 builder.Services.AddScoped<IJobOfferService, JobOfferService>();
