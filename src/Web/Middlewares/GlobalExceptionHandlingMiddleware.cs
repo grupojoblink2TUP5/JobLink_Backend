@@ -27,8 +27,8 @@ public class GlobalExceptionHandlingMiddleware : IMiddleware
             ProblemDetails problem = new()
             {
                 Status = statusCode,
-                Type = "Server error",
-                Title = "Server error",
+                Type = "NotFound",
+                Title = "Not Found",
                 Detail = ex.Message
             };
             string json = JsonSerializer.Serialize(problem);
@@ -48,6 +48,116 @@ public class GlobalExceptionHandlingMiddleware : IMiddleware
                 Status = statusCode,
                 Type = "Authentication error",
                 Title = "Authentication error",
+                Detail = ex.Message
+            };
+
+            string json = JsonSerializer.Serialize(problem);
+
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(json);
+        }
+        catch (DuplicateApplicationException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            int statusCode = (int)HttpStatusCode.Conflict;
+
+            context.Response.StatusCode = statusCode;
+
+            ProblemDetails problem = new()
+            {
+                Status = statusCode,
+                Type = "Conflict",
+                Title = "Conflict",
+                Detail = ex.Message
+            };
+
+            string json = JsonSerializer.Serialize(problem);
+
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(json);
+        }
+        catch (InvalidStatusException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            int statusCode = (int)HttpStatusCode.BadRequest;
+
+            context.Response.StatusCode = statusCode;
+
+            ProblemDetails problem = new()
+            {
+                Status = statusCode,
+                Type = "Invalid status",
+                Title = "Invalid status",
+                Detail = ex.Message
+            };
+
+            string json = JsonSerializer.Serialize(problem);
+
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(json);
+        }
+        catch (ForbiddenException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            int statusCode = (int)HttpStatusCode.Forbidden;
+
+            context.Response.StatusCode = statusCode;
+
+            ProblemDetails problem = new()
+            {
+                Status = statusCode,
+                Type = "Forbidden",
+                Title = "Forbidden",
+                Detail = ex.Message
+            };
+
+            string json = JsonSerializer.Serialize(problem);
+
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(json);
+        }
+        catch (ArgumentNullException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            int statusCode = (int)HttpStatusCode.BadRequest;
+
+            context.Response.StatusCode = statusCode;
+
+            ProblemDetails problem = new()
+            {
+                Status = statusCode,
+                Type = "Bad request",
+                Title = "Bad request",
+                Detail = ex.Message
+            };
+
+            string json = JsonSerializer.Serialize(problem);
+
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsync(json);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            int statusCode = (int)HttpStatusCode.BadRequest;
+
+            context.Response.StatusCode = statusCode;
+
+            ProblemDetails problem = new()
+            {
+                Status = statusCode,
+                Type = "Bad request",
+                Title = "Bad request",
                 Detail = ex.Message
             };
 
@@ -81,9 +191,9 @@ public class GlobalExceptionHandlingMiddleware : IMiddleware
             ProblemDetails problem = new()
             {
                 Status = statusCode,
-                Type = "Server error",
-                Title = "Server error",
-                Detail = "An internal server"
+                Type = "Bad request",
+                Title = "Bad request",
+                Detail = ex.Message
             };
             string json = JsonSerializer.Serialize(problem);
             context.Response.ContentType = "application/json";
