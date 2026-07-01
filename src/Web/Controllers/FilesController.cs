@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Web.Controllers;
 
@@ -15,6 +16,7 @@ public class FilesController : ControllerBase
         _cloudinaryService = cloudinaryService;
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpPost("upload-image")]
     public async Task<IActionResult> Upload(IFormFile file)
     {
@@ -34,6 +36,7 @@ public class FilesController : ControllerBase
 
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpPost("upload-document")]
     public async Task<IActionResult> UploadDocument(
     IFormFile file)

@@ -17,6 +17,58 @@ namespace Infrastructure.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
 
+            modelBuilder.Entity("Domain.Entities.Application", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AppliedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CurrentStatus")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OfferId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Applications");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ApplicationHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ApplicationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ChangedByRecruiterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("VisibleToCandidate")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationHistories");
+                });
+
             modelBuilder.Entity("Domain.Entities.Company", b =>
                 {
                     b.Property<int>("Id")
@@ -65,6 +117,28 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Cv", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Cvs");
                 });
 
             modelBuilder.Entity("Domain.Entities.Education", b =>
@@ -122,27 +196,49 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Experiences");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Cv", b =>
-           {
-               b.Property<int>("Id")
-                       .ValueGeneratedOnAdd()
-                       .HasColumnType("INTEGER");
+            modelBuilder.Entity("Domain.Entities.JobOffer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
-               b.Property<string>("PublicId")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
+                    b.Property<DateTime>("ClosingDate")
+                        .HasColumnType("TEXT");
 
-               b.Property<string>("Url")
-                    .IsRequired()
-                    .HasColumnType("TEXT");
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("INTEGER");
 
-               b.Property<int>("UserId")
-                    .HasColumnType("INTEGER");
+                    b.Property<int>("CreatedByRecruiterId")
+                        .HasColumnType("INTEGER");
 
-               b.HasKey("Id");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-               b.ToTable("Cvs");
-           });
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OfferType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("PublicationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Salary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JobOffers");
+                });
 
             modelBuilder.Entity("Domain.Entities.Notification", b =>
                 {

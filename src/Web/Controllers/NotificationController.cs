@@ -17,6 +17,7 @@ namespace Web.Controllers
             _notificationService = notificationService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -25,6 +26,7 @@ namespace Web.Controllers
             return Ok(notifications);
         }
 
+        [Authorize(Roles = "Recruiter,Admin,Candidate")]
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
@@ -46,7 +48,7 @@ namespace Web.Controllers
             return Ok(notifications);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpPost]
         public IActionResult Create([FromBody] CreateNotificationRequest request)
         {
@@ -59,6 +61,7 @@ namespace Web.Controllers
             );
         }
 
+        [Authorize(Roles = "Recruiter,Admin")]
         [HttpPut("{id:int}")]
         public IActionResult Update(
             [FromRoute] int id,
@@ -77,6 +80,7 @@ namespace Web.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {

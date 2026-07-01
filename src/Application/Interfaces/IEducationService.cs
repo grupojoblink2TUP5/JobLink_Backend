@@ -11,9 +11,9 @@ public interface IEducationService
 
     List<EducationResponse> GetEducationsByUserId(int userId);
 
-    EducationResponse CreateEducation(CreateEducationRequest request);
+    Task<EducationResponse> CreateEducationAsync(CreateEducationRequest request);
 
-    EducationResponse UpdateEducation(int id, UpdateEducationRequest request);
+    void UpdateEducation(int id, UpdateEducationRequest request);
 
-    bool DeleteEducation(int id);
+    void DeleteEducation(int id);
 }

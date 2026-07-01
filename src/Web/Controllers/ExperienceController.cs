@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces;
 using Application.DTOs.Experience.Request;
 using Microsoft.AspNetCore.Authorization;
-using Domain.Exceptions;
 
 namespace Web.Controllers
 {
@@ -17,6 +16,7 @@ namespace Web.Controllers
             _experienceService = experienceService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -25,6 +25,7 @@ namespace Web.Controllers
             return Ok(experiences);
         }
 
+        [Authorize(Roles = "Admin,Candidate")]
         [HttpGet("{id:int}")]
         public IActionResult GetById([FromRoute] int id)
         {
@@ -38,6 +39,7 @@ namespace Web.Controllers
             return Ok(experience);
         }
 
+        [Authorize(Roles = "Admin,Recruiter,Candidate")]
         [HttpGet("user/{userId:int}")]
         public IActionResult GetByUserId([FromRoute] int userId)
         {
@@ -46,11 +48,11 @@ namespace Web.Controllers
             return Ok(experiences);
         }
 
-        [Authorize]
+        [Authorize(Roles = "Candidate,Admin")]
         [HttpPost]
-        public IActionResult Create([FromBody] CreateExperienceRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateExperienceRequest request)
         {
-            var result = _experienceService.CreateExperience(request);
+            var result = await _experienceService.CreateExperienceAsync(request);
 
             return CreatedAtAction(
                 nameof(GetById),
@@ -59,33 +61,23 @@ namespace Web.Controllers
             );
         }
 
+        [Authorize(Roles = "Admin,Candidate")]
         [HttpPut("{id:int}")]
         public IActionResult Update(
             [FromRoute] int id,
             [FromBody] UpdateExperienceRequest request
         )
         {
-            try
-            {
-                var result = _experienceService.UpdateExperience(id, request);
+            _experienceService.UpdateExperience(id, request);
 
-                return Ok(result);
-            }
-            catch (NotFoundException)
-            {
-                return NotFound();
-            }
+            return NoContent();
         }
 
+        [Authorize(Roles = "Admin,Candidate")]
         [HttpDelete("{id:int}")]
         public IActionResult Delete([FromRoute] int id)
         {
-            var success = _experienceService.DeleteExperience(id);
-
-            if (!success)
-            {
-                return NotFound();
-            }
+            _experienceService.DeleteExperience(id);
 
             return NoContent();
         }

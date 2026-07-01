@@ -1,5 +1,6 @@
 using Application.DTOs.User.Request;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
@@ -10,75 +11,90 @@ public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
 
-    public UserController(IUserService userService)
+    public UserController(
+        IUserService userService)
     {
         _userService = userService;
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(_userService.GetAllUsers());
+        var users =
+            await _userService.GetAllUsersAsync();
+
+        return Ok(users);
     }
 
+    [Authorize(Roles = "Admin,Recruiter,Candidate")]
     [HttpGet("{id:int}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        var user = _userService.GetUserById(id);
-
-        if (user == null)
-            return NotFound();
+        var user =
+            await _userService.GetUserByIdAsync(id);
 
         return Ok(user);
     }
 
     [HttpPost]
-    public IActionResult Create(CreateUserRequest request)
+    public async Task<IActionResult> Create(
+        [FromBody] CreateUserRequest request)
     {
-        var user = _userService.CreateUser(request);
+        var user =
+            await _userService.CreateUserAsync(request);
 
         return CreatedAtAction(
             nameof(GetById),
             new { id = user.Id },
-            user
-        );
+            user);
     }
 
+    [Authorize(Roles = "Recruiter,Admin,Candidate")]
     [HttpPut("{id:int}")]
-    public IActionResult Update(int id, UpdateUserRequest request)
+    public async Task<IActionResult> Update(
+        int id,
+        [FromBody] UpdateUserRequest request)
     {
-        var user = _userService.UpdateUser(id, request);
+        var user =
+            await _userService.UpdateUserAsync(
+                id,
+                request);
 
         return Ok(user);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:int}/activate")]
-    public IActionResult Activate(int id)
+    public async Task<IActionResult> Activate(int id)
     {
-        try
-        {
-            var user = _userService.AddUser(id);
+        var user =
+            await _userService.ActivateAsync(id);
 
-            return Ok(user);
-        }
-        catch (Exception ex)
-        {
-            return NotFound(ex.Message);
-        }
+        return Ok(user);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPatch("{id:int}/deactivate")]
-    public IActionResult Deactivate(int id)
+    public async Task<IActionResult> Deactivate(int id)
     {
-        try
-        {
-            var user = _userService.RemoveUser(id);
+        var user =
+            await _userService.DeactivateAsync(id);
 
-            return Ok(user);
-        }
-        catch (Exception ex)
-        {
-            return NotFound(ex.Message);
-        }
+        return Ok(user);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPatch("{id:int}/role")]
+    public async Task<IActionResult> UpdateRole(
+    int id,
+    UpdateUserRoleRequest request)
+    {
+        var user =
+            await _userService.UpdateRoleAsync(
+                id,
+                request);
+
+        return Ok(user);
     }
 }

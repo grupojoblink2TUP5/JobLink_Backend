@@ -5,17 +5,17 @@ namespace Application.Interfaces;
 
 public interface IUserService
 {
-    List<UserResponse> GetAllUsers();
+    Task<List<UserResponse>> GetAllUsersAsync();
 
-    UserResponse? GetUserById(int id);
+    Task<UserResponse> GetUserByIdAsync(int id);
 
-    UserResponse CreateUser(CreateUserRequest request);
+    Task<UserResponse> CreateUserAsync(CreateUserRequest request);
 
-    UserResponse UpdateUser(int id, UpdateUserRequest request);
+    Task<UserResponse> UpdateUserAsync(int id, UpdateUserRequest request);
 
+    Task<UserResponse> ActivateAsync(int id);
 
-    UserResponse AddUser(int id); //Para cambiar el status ool al usuario a true
+    Task<UserResponse> DeactivateAsync(int id);
 
-    UserResponse RemoveUser(int id); //Para cambiar el status al usuario a false
-
+    Task<UserResponse> UpdateRoleAsync(int id, UpdateUserRoleRequest request);
 }

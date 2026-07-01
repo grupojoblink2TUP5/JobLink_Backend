@@ -4,5 +4,6 @@ namespace Application.Interfaces;
 
 public interface ICustomAuthenticationService
 {
-    string Authenticate(AuthenticationRequest request);
+    Task<string> AuthenticateAsync(
+        AuthenticationRequest request);
 }
