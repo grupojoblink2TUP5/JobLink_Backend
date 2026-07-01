@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Application.Interfaces;
 using Application.DTOs.Application.Request;
 using System.Security.Claims;
+using Domain.Exceptions;
 
 namespace Web.Controllers
 {
