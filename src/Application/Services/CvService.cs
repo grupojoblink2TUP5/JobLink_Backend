@@ -29,7 +29,7 @@ public class CvService : ICvService
         var user = await _userRepository.GetByIdAsync(userId);
 
         if (user is null)
-            throw new NotFoundException($"User not found. Id = {userId}");
+            throw new NotFoundException($"User", userId);
 
         if (!user.Status)
             throw new InvalidOperationException("User is not active.");
@@ -91,7 +91,7 @@ public class CvService : ICvService
         var cv = await _cvRepository.GetByUserIdAsync(userId);
 
         if (cv is null)
-            throw new NotFoundException($"CV not found for user. Id = {userId}");
+            throw new NotFoundException($"CV", userId);
 
         await _cvRepository.DeleteAsync(cv);
     }

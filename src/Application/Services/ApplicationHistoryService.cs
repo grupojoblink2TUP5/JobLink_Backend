@@ -38,7 +38,7 @@ public class ApplicationHistoryService : IApplicationHistoryService
         var entity = await _repository.GetByIdAsync(id);
 
         if (entity is null)
-            throw new NotFoundException($"ApplicationHistory not found. Id = {id}");
+            throw new NotFoundException("ApplicationHistory", id);
 
         return MapToResponse(entity);
     }
@@ -60,23 +60,17 @@ public class ApplicationHistoryService : IApplicationHistoryService
             throw new ArgumentException("ChangedByRecruiterId must be greater than zero.");
 
         if (!Enum.IsDefined(typeof(ApplicationStatus), request.Status))
-            throw new InvalidStatusException($"The status '{request.Status}' is not valid.");
+            throw new InvalidStatusException();
 
         var recruiter = await _userRepository.GetByIdAsync(request.ChangedByRecruiterId);
 
         if (recruiter is null)
-            throw new NotFoundException($"User not found. Id = {request.ChangedByRecruiterId}");
-
-        if (recruiter.Role != UserRole.Recruiter && recruiter.Role != UserRole.Admin)
-            throw new InvalidOperationException("Only recruiters or admins can register status changes.");
-
-        if (!recruiter.Status)
-            throw new InvalidOperationException("User is not active.");
+            throw new NotFoundException("User", request.ChangedByRecruiterId);
 
         var application = await _applicationRepository.GetByIdAsync(applicationId);
 
         if (application is null)
-            throw new NotFoundException($"Application not found. Id = {applicationId}");
+            throw new NotFoundException("Application", applicationId);
 
         var entity = new ApplicationHistory(
             applicationId,
@@ -103,12 +97,12 @@ public class ApplicationHistoryService : IApplicationHistoryService
         var entity = await _repository.GetByIdAsync(id);
 
         if (entity is null)
-            throw new NotFoundException($"ApplicationHistory not found. Id = {id}");
+            throw new NotFoundException("ApplicationHistory", id);
 
         var latest = await GetLatestAsync(entity.ApplicationId);
 
         if (latest is not null && latest.Id != entity.Id)
-            throw new ForbiddenException("Only the most recent history record can be modified.");
+            throw new ForbiddenException();
 
         entity.UpdateDetails(request.Description, request.VisibleToCandidate);
 
@@ -123,12 +117,12 @@ public class ApplicationHistoryService : IApplicationHistoryService
         var entity = await _repository.GetByIdAsync(id);
 
         if (entity is null)
-            throw new NotFoundException($"ApplicationHistory not found. Id = {id}");
+            throw new NotFoundException("ApplicationHistory", id);
 
         var allForApplication = await _repository.GetByApplicationIdAsync(entity.ApplicationId);
 
         if (allForApplication.Count <= 1)
-            throw new ForbiddenException("Cannot delete the only history record of the application.");
+            throw new ForbiddenException();
 
         _repository.Delete(entity);
         await _repository.SaveChangesAsync();

@@ -92,7 +92,9 @@ public class NotificationService : INotificationService
 
         if (notification == null)
         {
-            throw new NotFoundException($"Notification not found for id = {id}");
+            throw new NotFoundException(
+                nameof(Notification),
+                id);
         }
 
         notification.UpdateMessage(request.Message);
